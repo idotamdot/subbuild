@@ -19,6 +19,7 @@ import { assessPhysicalEnvelope, buildPrivateBrief, feasibilityItems, getUnresol
 import { createVaultKey, decryptDraft, encryptCoReview, encryptDraft, unlockVaultKey, type DraftEnvelope, type VaultKey } from '@/lib/local-vault'
 import PublishedContent from '@/components/published-content'
 import SubterraneanDesignStudio from '@/components/subterranean-design-studio'
+import ComplianceResearchWorkspace from '@/components/compliance-research-workspace'
 
 type Planner = PlanningDraft
 type Contact = {
@@ -410,7 +411,7 @@ export default function PlanningExperience() {
     <main>
       <header className="site-header shell">
         <a className="brand" href="#" aria-label="Enter Sanctum SubTerranean Private Construction home"><span className="brand-mark"><Shield size={18} /></span><span className="brand-copy"><span className="brand-name">ENTER SANCTUM SUBTERRANEAN</span><span className="brand-suffix">PRIVATE CONSTRUCTION</span></span></a>
-        <nav className="nav" aria-label="Main navigation"><a href="#design-studio">Design studio</a><a href="#solutions">Solutions</a><a href="#comparison">Compare</a><a href="#evidence">Our approach</a><a className="nav-cta" href="#planner" onClick={() => setStep(0)}>Plan privately <ArrowRight size={14} /></a></nav>
+        <nav className="nav" aria-label="Main navigation"><a href="#design-studio">Design studio</a><a href="#compliance-research">GIS + compliance</a><a href="#solutions">Solutions</a><a href="#comparison">Compare</a><a href="#evidence">Our approach</a><a className="nav-cta" href="#planner" onClick={() => setStep(0)}>Plan privately <ArrowRight size={14} /></a></nav>
       </header>
       <div className="shell">
         <section className="hero" aria-labelledby="hero-title">
@@ -430,6 +431,7 @@ export default function PlanningExperience() {
         </section>
       </div>
       <SubterraneanDesignStudio />
+      <ComplianceResearchWorkspace />
       <section className="section shell" id="solutions" aria-labelledby="solutions-title">
         <div className="section-heading"><div><span className="eyebrow">SHELTER & CARPENTRY</span><h2 id="solutions-title">Begin with the right questions.</h2></div><p>Every property is different. Start with plain-language options, then explore the factors that deserve a closer look.</p></div>
         <div className="solution-grid">{solutions.map((solution) => <a className="solution-card" href={`#${solution.target}`} key={solution.id} onClick={() => { setPlan((current) => ({ ...current, goal: solution.id === 'storm' ? 'Storm shelter' : solution.id === 'room' ? 'Safe room' : 'Custom shelter' })); }}><span className="card-number">{solution.number}</span><h3>{solution.title}</h3><p>{solution.copy}</p><span className="card-link">Explore planning guidance <ChevronRight size={16} /></span></a>)}</div>
