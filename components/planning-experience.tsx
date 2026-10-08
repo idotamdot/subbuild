@@ -12,12 +12,15 @@ import {
   FileText,
   MapPin,
   Shield,
+  UsersRound,
 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { assessPhysicalEnvelope, buildPlanningBrief, feasibilityItems, getUnresolvedItems, type FeasibilityAnswer, type PlanningDraft } from '@/lib/planning'
 import PublishedContent from '@/components/published-content'
 import SubterraneanDesignStudio from '@/components/subterranean-design-studio'
 import ComplianceResearchWorkspace from '@/components/compliance-research-workspace'
+import CommunityPreparednessWorkspace from '@/components/community-preparedness-workspace'
+import LlmSanctuaryWorkspace from '@/components/llm-sanctuary-workspace'
 
 type Planner = PlanningDraft
 type Contact = {
@@ -68,12 +71,14 @@ const criteria = [
 const priorities = ['Longer duration', 'Air filtration', 'Medical access', 'Daily accessibility', 'Budget', 'Simple installation']
 const stepNames = ['Your goal', 'Project context', 'Feasibility', 'Review & share']
 const workspaces = [
-  { id: 'design', label: 'Design studio' },
-  { id: 'research', label: 'Site research' },
-  { id: 'solutions', label: 'Solutions' },
-  { id: 'comparison', label: 'Compare concepts' },
-  { id: 'approach', label: 'Approach & evidence' },
-  { id: 'planner', label: 'Project brief' },
+  { id: 'community', label: 'Readiness' },
+  { id: 'research', label: 'Hazards & sources' },
+  { id: 'design', label: 'Safety-place studio' },
+  { id: 'solutions', label: 'Approaches' },
+  { id: 'comparison', label: 'Compare' },
+  { id: 'sanctuary', label: 'LLM Sanctuary' },
+  { id: 'approach', label: 'Guidance' },
+  { id: 'planner', label: 'Community brief' },
 ] as const
 type WorkspaceId = typeof workspaces[number]['id']
 
@@ -144,7 +149,7 @@ export default function PlanningExperience() {
   const [referenceKey, setReferenceKey] = useState('')
   const [receiptChecked, setReceiptChecked] = useState(false)
   const [shareNotice, setShareNotice] = useState('')
-  const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>('design')
+  const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>('community')
   const workspaceTabRefs = useRef<Array<HTMLButtonElement | null>>([])
   const stageTabRefs = useRef<Array<HTMLButtonElement | null>>([])
 
@@ -254,9 +259,9 @@ export default function PlanningExperience() {
     <section className="planner-section" id="planner" aria-labelledby="planner-title">
       <div className="shell section planner-layout">
         <aside className="planner-aside">
-          <span className="eyebrow">PROJECT BRIEF / YOUR PROJECT</span>
-          <h2 id="planner-title">Start with what you know.</h2>
-          <p>Plan directly with your local carpenter. A few optional prompts can help organize your thinking. Unknowns are expected; nothing here determines if a site is safe or suitable.</p>
+          <span className="eyebrow">COMMUNITY BRIEF / START WHERE YOU ARE</span>
+          <h2 id="planner-title">Every life matters. Prepare so no one is left out.</h2>
+          <p>Bring community needs, concerns, and unanswered questions into one starting brief. This does not assess a hazard or determine if a location is safe.</p>
           <div className="privacy-points">
             <div className="privacy-point"><FileText size={17} /> Your draft stays in this open page and clears when you close or reload it.</div>
             <div className="privacy-point"><Shield size={17} /> Downloads are readable JSON files; include only details you want to share.</div>
@@ -269,7 +274,7 @@ export default function PlanningExperience() {
           {reference ? (
             <div>
               <div className="eyebrow">REQUEST RECEIVED</div>
-              <h3 style={{ marginTop: 12 }}>Thank you. Your carpenter has received your request.</h3>
+              <h3 style={{ marginTop: 12 }}>Thank you. Your community planning request has been received.</h3>
               <div className="reference" aria-label={`Inquiry reference ${reference}`}>{reference}</div>
               <p className="step-hint">This is an on-page-only acknowledgment. No email or text was sent. A response is expected within two business days. Please avoid sharing exact property locations or other sensitive details during initial contact.</p>
               <div className="summary"><dl><div><dt>Preferred contact</dt><dd>{contact.channel}</dd></div><div><dt>Contact window</dt><dd>{contact.window}</dd></div><div><dt>Inquiry reference</dt><dd>{reference}</dd></div><div><dt>Expected response</dt><dd>Within two business days</dd></div></dl></div>
@@ -363,27 +368,27 @@ export default function PlanningExperience() {
   return (
     <main>
       <header className="site-header shell">
-        <a className="brand" href="#" aria-label="Enter Sanctum SubTerranean Private Construction home"><span className="brand-mark"><Shield size={18} /></span><span className="brand-copy"><span className="brand-name">ENTER SANCTUM SUBTERRANEAN</span><span className="brand-suffix">PRIVATE CONSTRUCTION</span></span></a>
-        <nav className="nav" aria-label="Main navigation"><button type="button" onClick={() => selectWorkspace('design')}>Design studio</button><button type="button" onClick={() => selectWorkspace('research')}>Site research</button><button type="button" onClick={() => selectWorkspace('comparison')}>Compare</button><button className="nav-cta" type="button" onClick={scrollToPlanner}>Project brief <ArrowRight size={14} /></button></nav>
+        <a className="brand" href="#" aria-label="CommonGround Atlas home"><span className="brand-mark"><Shield size={18} /></span><span className="brand-copy"><span className="brand-name">COMMONGROUND ATLAS</span><span className="brand-suffix">GLOBAL COMMUNITY READINESS</span></span></a>
+        <nav className="nav" aria-label="Main navigation"><button type="button" onClick={() => selectWorkspace('community')}>Readiness</button><button type="button" onClick={() => selectWorkspace('research')}>Hazards & sources</button><button type="button" onClick={() => selectWorkspace('design')}>Safety-place studio</button><button type="button" onClick={() => selectWorkspace('sanctuary')}>LLM Sanctuary</button><button className="nav-cta" type="button" onClick={scrollToPlanner}>Community brief <ArrowRight size={14} /></button></nav>
       </header>
       <div className="shell">
         <section className="hero" aria-labelledby="hero-title">
           <div>
-            <div className="eyebrow">INDEPENDENT CARPENTER / CENTRAL TEXAS</div>
-            <h1 id="hero-title">A more thoughtful way to plan for <em>what matters.</em></h1>
-            <p className="hero-copy">Thoughtful shelter planning, with a local carpenter who works directly with you from the first conversation. Explore concepts, compare options, and prepare a clear project brief before any professional consultation.</p>
-            <div className="hero-actions"><button className="button primary" onClick={scrollToPlanner}>Build a project brief <ArrowRight size={16} /></button><button className="button" onClick={() => selectWorkspace('solutions')}>Explore solutions <ArrowDown size={15} /></button></div>
-            <div className="hero-note"><FileText size={13} /> Early design workspace. Persistent accounts and shared project storage are planned for a later stage.</div>
+            <div className="eyebrow">A GLOBAL COMMUNITY READINESS ATLAS</div>
+            <h1 id="hero-title">A world that <em>prepares together.</em></h1>
+            <p className="hero-copy">A shared starting point for communities to understand risk, include everyone in preparedness, and coordinate trusted next steps across borders. From earthquakes and floods to disease outbreaks, volcanic hazards, meteors, conflict, and unknown events.</p>
+            <div className="hero-actions"><button className="button primary" onClick={() => selectWorkspace('community')}>Explore community readiness <ArrowRight size={16} /></button><button className="button" onClick={() => selectWorkspace('sanctuary')}>Build an LLM Sanctuary concept <ArrowDown size={15} /></button></div>
+            <div className="hero-note"><FileText size={13} /> The ambition is to help protect every life. This prototype cannot promise that everybody can be saved.</div>
           </div>
           <Blueprint />
         </section>
         <section className="trust-strip" aria-label="Planning commitments">
-          <div className="trust-item"><span className="trust-icon"><MapPin size={17} /></span> Serving Central Texas, including Elgin and Taylor</div>
-          <div className="trust-item"><span className="trust-icon"><FileText size={17} /></span> Portable planning briefs and co-review files</div>
-          <div className="trust-item"><span className="trust-icon"><Shield size={17} /></span> Work directly with your carpenter—no sales team</div>
+          <div className="trust-item"><span className="trust-icon"><UsersRound size={17} /></span> Community-led preparedness, not one-size-fits-all plans</div>
+          <div className="trust-item"><span className="trust-icon"><FileText size={17} /></span> Official source links—live integrations are not connected</div>
+          <div className="trust-item"><span className="trust-icon"><Shield size={17} /></span> Human authorities and qualified experts stay in charge</div>
         </section>
       </div>
-      <div className="shell workspace-tab-shell" id="workspace-tabs">
+      <div className="shell workspace-tab-shell workspace-nav" id="workspace-tabs">
         <div className="workspace-tabs" role="tablist" aria-label="Planning workspaces">
           {workspaces.map((workspace, index) => <button
             key={workspace.id}
@@ -399,6 +404,7 @@ export default function PlanningExperience() {
           >{workspace.label}</button>)}
         </div>
       </div>
+      <div id="workspace-panel-community" className="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-community" tabIndex={0} hidden={activeWorkspace !== 'community'}><CommunityPreparednessWorkspace /></div>
       <div id="workspace-panel-design" className="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-design" tabIndex={0} hidden={activeWorkspace !== 'design'}><SubterraneanDesignStudio /></div>
       <div id="workspace-panel-research" className="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-research" tabIndex={0} hidden={activeWorkspace !== 'research'}><ComplianceResearchWorkspace /></div>
       <div id="workspace-panel-solutions" className="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-solutions" tabIndex={0} hidden={activeWorkspace !== 'solutions'}>
@@ -407,6 +413,7 @@ export default function PlanningExperience() {
           <div className="solution-grid">{solutions.map((solution) => <button className="solution-card" type="button" key={solution.id} onClick={() => { setPlan((current) => ({ ...current, goal: solution.id === 'storm' ? 'Storm shelter' : solution.id === 'room' ? 'Safe room' : 'Custom shelter' })); selectWorkspace('comparison') }}><span className="card-number">{solution.number}</span><h3>{solution.title}</h3><p>{solution.copy}</p><span className="card-link">Explore planning guidance <ChevronRight size={16} /></span></button>)}</div>
         </section>
       </div>
+      <div id="workspace-panel-sanctuary" className="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-sanctuary" tabIndex={0} hidden={activeWorkspace !== 'sanctuary'}><LlmSanctuaryWorkspace /></div>
       <div id="workspace-panel-comparison" className="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-comparison" tabIndex={0} hidden={activeWorkspace !== 'comparison'}>
         <section className="section shell" aria-labelledby="compare-title">
           <div className="section-heading"><div><span className="eyebrow">STAGE 02 / COMPARISON</span><h2 id="compare-title">Compare the planning landscape.</h2></div><p>Use these broad prompts to prepare for a conversation—not to select a final design.</p></div>
@@ -426,7 +433,7 @@ export default function PlanningExperience() {
         <PublishedContent />
       </div>
       <div id="workspace-panel-planner" className="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-planner" tabIndex={0} hidden={activeWorkspace !== 'planner'}>{plannerContent}</div>
-      <footer className="footer shell"><div className="footer-row"><strong>ENTER SANCTUM SUBTERRANEAN / CENTRAL TEXAS</strong><span>Planning guidance only — not engineering, permitting, or an emergency service.</span><span>Design preview / storage integration planned</span></div><div style={{ marginTop: 12 }}>In-progress answers are kept in page memory for this prototype. Persistent drafts and shared project spaces can be added with the planned Neon database. Submitted inquiries continue to use the existing protected intake flow.</div></footer>
+      <footer className="footer shell"><div className="footer-row"><strong>COMMONGROUND ATLAS / COMMUNITY READINESS</strong><span>Planning aid—not emergency response or official zone designation.</span><span>Global coordination / concept stage</span></div><div style={{ marginTop: 12 }}>This prototype has no live global hazard feeds, government-agency integrations, verified safety zones, connected AI, or emergency response. Follow instructions from the authorities responsible for your area during real events. The goal is to help communities work toward protecting every life, without promising an outcome no tool can guarantee.</div></footer>
     </main>
   )
 }
