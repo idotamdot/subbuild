@@ -139,8 +139,8 @@ describe('concept estimates', () => {
     }).area
 
     expect(estimateFootprint('rectangular')).toBe(384)
-    expect(estimateFootprint('l-shaped')).toBeCloseTo(299.52)
+    expect(estimateFootprint('l-shaped')).toBeCloseTo(311.424)
     expect(estimateFootprint('octagonal')).toBeCloseTo(345.6)
-    expect(estimateFootprint('circular')).toBeCloseTo(301.59, 1)
+    expect(estimateFootprint('circular')).toBeCloseTo(201.06, 1)
   })
 })

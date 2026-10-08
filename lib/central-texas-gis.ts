@@ -58,11 +58,14 @@ export function parseCountyFeatures(value: unknown): CountyFeature[] {
     }
     const { GEOID, NAME, STATE } = feature.properties
     const { type, coordinates } = feature.geometry
-    if (typeof GEOID !== 'string' || typeof NAME !== 'string' || STATE !== '48') {
+    if (typeof GEOID !== 'string' || typeof NAME !== 'string') {
       throw new Error('The Census GIS service returned invalid county boundary data.')
     }
     if (!Object.values(centralTexasCounties).some((supportedGeoid) => supportedGeoid === GEOID)) {
       throw new Error('The Census GIS service returned a county outside the supported map area.')
+    }
+    if (STATE !== '48') {
+      throw new Error('The Census GIS service returned invalid county boundary data.')
     }
     if (type === 'Polygon' && isPolygonCoordinates(coordinates)) {
       return { type: 'Feature', properties: { GEOID, NAME, STATE }, geometry: { type, coordinates } }

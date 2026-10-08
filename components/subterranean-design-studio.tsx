@@ -167,6 +167,8 @@ function makeConceptSvg(
   const finishData = finishes.find((item) => item.key === finish)!
   const roomWidth = 270 + ((length - 24) / 24) * 150
   const x = 350 - roomWidth / 2
+  const amenityWidth = footprint === 'circular' ? Math.min(roomWidth, 58) : roomWidth
+  const amenityOffset = (roomWidth - amenityWidth) / 2
   const levels = floors.map((room, index) => {
     const y = 101 + index * 74
     return `
@@ -177,7 +179,7 @@ function makeConceptSvg(
         <text x="${x + 15}" y="${y + 42}" fill="#bac6c1" font-family="monospace" font-size="9">LEVEL ${String(index + 1).padStart(2, '0')} / CONCEPT</text>
         ${amenities.filter((item) => item.level === index).map((item) => {
           const option = amenityOptions.find((candidate) => candidate.key === item.kind)!
-          return `<rect x="${x + roomWidth * item.x - 5}" y="${y + 17 + item.y * 18}" width="10" height="10" rx="2" fill="${option.color}"/>`
+          return `<rect x="${x + amenityOffset + amenityWidth * item.x - 5}" y="${y + 17 + item.y * 18}" width="10" height="10" rx="2" fill="${option.color}"/>`
         }).join('')}
       </g>`
   }).join('')
@@ -225,6 +227,8 @@ function makeConceptSvg(
     <path d="M91 82v-24h28v24" fill="none" stroke="#d4ba8d" stroke-width="2"/>
     <text x="42" y="43" fill="#d7dfd5" font-family="monospace" font-size="10" letter-spacing="1.2">CONCEPTUAL SECTION / NOT FOR CONSTRUCTION</text>
     <text x="42" y="${Math.max(145, bottom + 35)}" fill="#b7c2b9" font-family="monospace" font-size="10">${length} ft × ${width} ft / ${floors.length} LEVEL${floors.length > 1 ? 'S' : ''} / ${finishData.label.toUpperCase()}</text>
+    <text x="42" y="${bottom + 49}" fill="#b7c2b9" font-family="monospace" font-size="8">POWER: ${systems.power.toUpperCase()} / WATER: ${systems.water.toUpperCase()}</text>
+    <text x="42" y="${bottom + 61}" fill="#b7c2b9" font-family="monospace" font-size="8">AIR: ${systems.air.toUpperCase()} / CONTROLS: ${systems.controls.toUpperCase()}</text>
     <text x="${x + 8}" y="91" fill="#d7c996" font-family="monospace" font-size="8">${stairs.toUpperCase()} STAIR STUDY</text>
     ${stairGlyph}${stairMarks}${stairLevels}
     ${liftShaft}
@@ -336,6 +340,8 @@ type WebXRSessionProps = {
   selectedLevel: number
   stairs: StairKey
   lift: LiftKey
+  systems: BuildingSystems
+  systems: BuildingSystems
   collaborator: CollaboratorKey
   voiceAllowed: boolean
   onClose: () => void
@@ -409,6 +415,7 @@ function roomVertices({
   amenities,
   stairs,
   lift,
+  systems,
 }: {
   color: Color3
   activeFinish: FinishKey
@@ -422,6 +429,7 @@ function roomVertices({
   amenities: PlacedAmenity[]
   stairs: StairKey
   lift: LiftKey
+  systems: BuildingSystems
 }): Float32Array {
   const vertices: number[] = []
   const quad = (points: Point3[], tint: number, baseColor: Color3 = color): void => {
@@ -429,13 +437,14 @@ function roomVertices({
     for (const index of [0, 1, 2, 0, 2, 3]) vertices.push(...points[index], ...shaded)
   }
   const wall: Color3 = [0.24, 0.31, 0.34]
+  const interfaceZ = -3.8
   quad([[-4, 0, -5], [-4, 3.2, -5], [4, 3.2, -5], [4, 0, -5]], 0.74)
   quad([[-4, 0, 5], [-4, 3.2, 5], [4, 3.2, 5], [4, 0, 5]], 0.68)
   quad([[-4, 0, -5], [-4, 3.2, -5], [-4, 3.2, 5], [-4, 0, 5]], wall[0])
   quad([[4, 0, 5], [4, 3.2, 5], [4, 3.2, -5], [4, 0, -5]], wall[0])
   quad([[-4, 3.2, -5], [4, 3.2, -5], [4, 3.2, 5], [-4, 3.2, 5]], 0.5)
   quad([[-4, 0, 5], [4, 0, 5], [4, 0, -5], [-4, 0, -5]], 0.95)
-  quad([[-0.7, 0, -4.98], [-0.7, 2.2, -4.98], [0.7, 2.2, -4.98], [0.7, 0, -4.98]], 0.3)
+  quad([[-3.85, 0.48, interfaceZ - 0.04], [-3.85, 2.95, interfaceZ - 0.04], [3.85, 2.95, interfaceZ - 0.04], [3.85, 0.48, interfaceZ - 0.04]], 0.4, wall)
   const swatchX: number[] = [-2.4, -0.8, 0.8, 2.4]
   for (const [index, item] of finishes.entries()) {
     const swatch: Color3 = [
@@ -444,15 +453,15 @@ function roomVertices({
       parseInt(item.color.slice(5, 7), 16) / 255,
     ]
     const centerX = swatchX[index]
-    quad([[centerX - 0.36, 2.25, -4.9], [centerX - 0.36, 2.83, -4.9], [centerX + 0.36, 2.83, -4.9], [centerX + 0.36, 2.25, -4.9]], 0.56, [0.75, 0.78, 0.7])
-    quad([[centerX - 0.27, 2.34, -4.86], [centerX - 0.27, 2.74, -4.86], [centerX + 0.27, 2.74, -4.86], [centerX + 0.27, 2.34, -4.86]], item.key === activeFinish ? 1 : 0.66, swatch)
+    quad([[centerX - 0.36, 2.25, interfaceZ], [centerX - 0.36, 2.83, interfaceZ], [centerX + 0.36, 2.83, interfaceZ], [centerX + 0.36, 2.25, interfaceZ]], 0.56, [0.75, 0.78, 0.7])
+    quad([[centerX - 0.27, 2.34, interfaceZ + 0.04], [centerX - 0.27, 2.74, interfaceZ + 0.04], [centerX + 0.27, 2.74, interfaceZ + 0.04], [centerX + 0.27, 2.34, interfaceZ + 0.04]], item.key === activeFinish ? 1 : 0.66, swatch)
   }
   const roomSlots: number[] = [-3.2, -1.6, 0, 1.6, 3.2]
   for (const [index, room] of roomTypes.entries()) {
     const centerX = roomSlots[index]
     const selectedColor: Color3 = room === selectedRoom ? collaboratorColor : [0.34, 0.4, 0.36]
-    quad([[centerX - 0.43, 1.34, -4.89], [centerX - 0.43, 1.9, -4.89], [centerX + 0.43, 1.9, -4.89], [centerX + 0.43, 1.34, -4.89]], 0.85, selectedColor)
-    quad([[centerX - 0.32, 1.45, -4.84], [centerX - 0.32, 1.78, -4.84], [centerX + 0.32, 1.78, -4.84], [centerX + 0.32, 1.45, -4.84]], 1, selectedColor)
+    quad([[centerX - 0.43, 1.34, interfaceZ], [centerX - 0.43, 1.9, interfaceZ], [centerX + 0.43, 1.9, interfaceZ], [centerX + 0.43, 1.34, interfaceZ]], 0.85, selectedColor)
+    quad([[centerX - 0.32, 1.45, interfaceZ + 0.04], [centerX - 0.32, 1.78, interfaceZ + 0.04], [centerX + 0.32, 1.78, interfaceZ + 0.04], [centerX + 0.32, 1.45, interfaceZ + 0.04]], 1, selectedColor)
   }
   const firstVisibleLevel = Math.max(0, Math.min(rooms.length - 6, selectedLevel - 2))
   const visibleLevels = rooms.slice(firstVisibleLevel, firstVisibleLevel + 6)
@@ -464,18 +473,18 @@ function roomVertices({
   const addAction = collaboratorColor
   const actionCenters: number[] = [-2.4, 0, 2.4]
   for (const centerX of actionCenters) {
-    quad([[centerX - 0.36, 0.55, -4.89], [centerX - 0.36, 1.07, -4.89], [centerX + 0.36, 1.07, -4.89], [centerX + 0.36, 0.55, -4.89]], 0.62, [0.62, 0.67, 0.58])
+    quad([[centerX - 0.36, 0.55, interfaceZ], [centerX - 0.36, 1.07, interfaceZ], [centerX + 0.36, 1.07, interfaceZ], [centerX + 0.36, 0.55, interfaceZ]], 0.62, [0.62, 0.67, 0.58])
   }
-  quad([[-2.52, 0.68, -4.84], [-2.52, 0.94, -4.84], [-2.28, 0.94, -4.84], [-2.28, 0.68, -4.84]], 1, addAction)
-  quad([[-0.12, 0.68, -4.84], [-0.12, 0.94, -4.84], [0.12, 0.94, -4.84], [0.12, 0.68, -4.84]], 1, collaboratorColor)
-  quad([[2.28, 0.68, -4.84], [2.28, 0.94, -4.84], [2.52, 0.94, -4.84], [2.52, 0.68, -4.84]], 1, [0.78, 0.67, 0.42])
+  quad([[-2.52, 0.68, interfaceZ + 0.04], [-2.52, 0.94, interfaceZ + 0.04], [-2.28, 0.94, interfaceZ + 0.04], [-2.28, 0.68, interfaceZ + 0.04]], 1, addAction)
+  quad([[-0.12, 0.68, interfaceZ + 0.04], [-0.12, 0.94, interfaceZ + 0.04], [0.12, 0.94, interfaceZ + 0.04], [0.12, 0.68, interfaceZ + 0.04]], 1, collaboratorColor)
+  quad([[2.28, 0.68, interfaceZ + 0.04], [2.28, 0.94, interfaceZ + 0.04], [2.52, 0.94, interfaceZ + 0.04], [2.52, 0.68, interfaceZ + 0.04]], 1, [0.78, 0.67, 0.42])
   appendEllipsoid(vertices, [2.45, 1.45, -1.15], [0.3, 0.38, 0.25], collaboratorColor)
   appendEllipsoid(vertices, [2.45, 2.02, -1.15], [0.23, 0.24, 0.21], collaboratorColor)
   const orbitColor: Color3 = [0.93, 0.84, 0.59]
   appendEllipsoid(vertices, [2.12, 1.99, -1.15], [0.045, 0.045, 0.045], orbitColor, 8, 6)
   appendEllipsoid(vertices, [2.76, 1.68, -1.15], [0.035, 0.035, 0.035], orbitColor, 8, 6)
   const footprintHex = `#${color.map((channel) => Math.round(channel * 255).toString(16).padStart(2, '0')).join('')}`
-  const concept = screenSceneVertices(footprint, footprintHex, amenities, selectedLevel, stairs, lift, lengthFeet, widthFeet)
+  const concept = screenSceneVertices(footprint, footprintHex, amenities, selectedLevel, stairs, lift, systems, lengthFeet, widthFeet)
   const scene = new Float32Array(vertices.length + concept.length)
   scene.set(vertices)
   scene.set(concept, vertices.length)
@@ -502,6 +511,7 @@ function screenSceneVertices(
   level: number,
   stairs: StairKey,
   lift: LiftKey,
+  systems: BuildingSystems,
   lengthFeet: number,
   widthFeet: number,
 ): Float32Array {
@@ -541,7 +551,11 @@ function screenSceneVertices(
     const x2 = rawX2 * lengthScale
     const z2 = rawZ2 * widthScale
     quad([x1, 0, z1], [x1, 3.2, z1], [x2, 3.2, z2], [x2, 0, z2], wallColor)
-    if (index > 0) triangle([0, 0.06, 0], [x1, 0.06, z1], [x2, 0.06, z2], floorColor)
+    if (shape !== 'l-shaped' && index > 0) triangle([0, 0.06, 0], [x1, 0.06, z1], [x2, 0.06, z2], floorColor)
+  }
+  if (shape === 'l-shaped') {
+    quad([-4 * lengthScale, 0.06, -4 * widthScale], [-4 * lengthScale, 0.06, 0], [4 * lengthScale, 0.06, 0], [4 * lengthScale, 0.06, -4 * widthScale], floorColor)
+    quad([-4 * lengthScale, 0.06, 0], [-4 * lengthScale, 0.06, 4 * widthScale], [0, 0.06, 4 * widthScale], [0, 0.06, 0], floorColor)
   }
   const addBox = (cx: number, cy: number, cz: number, sx: number, sy: number, sz: number, color: Color3): void => {
     const scaledCx = cx * lengthScale
@@ -568,6 +582,17 @@ function screenSceneVertices(
   if (lift !== 'none') {
     addBox(2.9, 0.05, -2.8, 1.2, 3.05, 1.2, [0.28, 0.43, 0.42])
     addBox(2.9, 0.1, -2.8, 0.82, 1.9, 0.82, [0.55, 0.66, 0.62])
+  }
+  const systemStudies: Array<{ key: keyof BuildingSystems; color: Color3; height: number }> = [
+    { key: 'power', color: systems.power === 'hybrid-microgrid' ? [0.91, 0.59, 0.34] : systems.power === 'solar-storage' ? [0.88, 0.77, 0.43] : [0.68, 0.65, 0.48], height: systems.power === 'hybrid-microgrid' ? 0.72 : 0.45 },
+    { key: 'water', color: systems.water === 'independent-treatment' ? [0.34, 0.73, 0.74] : systems.water === 'treatment-reuse' ? [0.4, 0.65, 0.71] : [0.41, 0.56, 0.65], height: systems.water === 'independent-treatment' ? 0.7 : 0.5 },
+    { key: 'air', color: systems.air === 'redundant-air-study' ? [0.72, 0.79, 0.55] : systems.air === 'filtered-heat-recovery' ? [0.58, 0.75, 0.57] : [0.5, 0.65, 0.52], height: systems.air === 'redundant-air-study' ? 0.78 : 0.62 },
+    { key: 'controls', color: systems.controls === 'integrated-resilience' ? [0.82, 0.69, 0.39] : systems.controls === 'building-automation' ? [0.75, 0.67, 0.42] : [0.63, 0.59, 0.4], height: systems.controls === 'integrated-resilience' ? 0.68 : 0.38 },
+  ]
+  for (const [index, system] of systemStudies.entries()) {
+    const x = -2.4 + (index % 2) * 4.8
+    const z = -2.7 + Math.floor(index / 2) * 5.4
+    addBox(x, 0.08, z, 0.55, system.height, 0.28, system.color)
   }
   for (const item of amenities.filter((amenity) => amenity.level === level)) {
     const option = amenityOptions.find((candidate) => candidate.key === item.kind)
@@ -643,17 +668,17 @@ function Screen3DPreview({ finishColor, shape, amenities, level, stairs, lift, l
       gl.attachShader(program, fragmentShader)
       gl.linkProgram(program)
       if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program) ?? 'The 3D preview shader could not link.')
-      gl.useProgram(program)
-      const position = gl.getAttribLocation(program, 'position')
-      const color = gl.getAttribLocation(program, 'color')
-      const projectionView = gl.getUniformLocation(program, 'projectionView')
+      const activeProgram: WebGLProgram = program
+      gl.useProgram(activeProgram)
+      const position = gl.getAttribLocation(activeProgram, 'position')
+      const color = gl.getAttribLocation(activeProgram, 'color')
       gl.enableVertexAttribArray(position)
       gl.enableVertexAttribArray(color)
       gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 24, 0)
       gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 24, 12)
       gl.enable(gl.DEPTH_TEST)
       gl.disable(gl.CULL_FACE)
-      const vertices = screenSceneVertices(shape, finishColor, amenities, level, stairs, lift, lengthFeet, widthFeet)
+      const vertices = screenSceneVertices(shape, finishColor, amenities, level, stairs, lift, systems, lengthFeet, widthFeet)
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
       gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
       drawRef.current = () => {
@@ -668,7 +693,7 @@ function Screen3DPreview({ finishColor, shape, amenities, level, stairs, lift, l
           screenPerspective(canvas.width / Math.max(1, canvas.height)),
           screenView(rotationRef.current.yaw, rotationRef.current.pitch),
         )
-        const uniform = gl.getUniformLocation(program, 'projectionView')
+        const uniform = gl.getUniformLocation(activeProgram, 'projectionView')
         gl.uniformMatrix4fv(uniform, false, projectionView)
         gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 6)
       }
@@ -685,7 +710,7 @@ function Screen3DPreview({ finishColor, shape, amenities, level, stairs, lift, l
       if (vertexShader) gl.deleteShader(vertexShader)
       if (fragmentShader) gl.deleteShader(fragmentShader)
     }
-  }, [finishColor, shape, amenities, level, stairs, lift, lengthFeet, widthFeet])
+  }, [finishColor, shape, amenities, level, stairs, lift, systems, lengthFeet, widthFeet])
 
   return (
     <div className="studio-3d-preview">
@@ -717,6 +742,7 @@ function FloorPlanEditor({
   level,
   stairs,
   lift,
+  systems,
   lengthFeet,
   widthFeet,
   onPlace,
@@ -811,6 +837,7 @@ function WebXRSession({
   selectedLevel,
   stairs,
   lift,
+  systems,
   collaborator,
   voiceAllowed,
   onClose,
@@ -882,11 +909,12 @@ function WebXRSession({
       amenities,
       stairs,
       lift,
+      systems,
     })
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
     vertexCountRef.current = vertices.length / 6
-  }, [finish, lengthFeet, widthFeet, rooms, selectedLevel, collaborator, footprint, amenities, stairs, lift])
+  }, [finish, lengthFeet, widthFeet, rooms, selectedLevel, collaborator, footprint, amenities, stairs, lift, systems])
 
   const enterVr = async () => {
     setError('')
@@ -950,6 +978,7 @@ function WebXRSession({
         amenities,
         stairs,
         lift,
+        systems,
       })
       const buffer = gl.createBuffer()
       if (!buffer) throw new Error('Your browser could not allocate the VR room geometry.')
@@ -1193,10 +1222,14 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
 
   const addFloor = (): void => setRooms((current) => [...current, 'Open living'])
   const removeFloor = (): void => {
+    if (rooms.length <= 1) return
+    const removedLevel = rooms.length - 1
     setRooms((current) => current.length > 1 ? current.slice(0, -1) : current)
-    setSelectedLevel((current) => Math.min(current, rooms.length - 2))
+    setPlacedAmenities((current) => current.filter((item) => item.level < removedLevel))
+    setSelectedLevel((current) => Math.min(current, removedLevel - 1))
   }
   const isInsideFootprint = (x: number, y: number): boolean => {
+    if (x < 0 || x > 1 || y < 0 || y > 1) return false
     if (footprint === 'l-shaped') return x <= 0.58 || y <= 0.55
     if (footprint === 'circular') {
       const pointX = (x - 0.5) * length
@@ -1217,7 +1250,12 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
   }
   const addAmenity = (kind: AmenityKey): void => {
     const candidateSlots: Array<[number, number]> = [[0.25, 0.25], [0.72, 0.25], [0.25, 0.72], [0.48, 0.42], [0.72, 0.72]]
-    const slot = candidateSlots.find(([x, y]) => isInsideFootprint(x, y)) ?? [0.25, 0.25]
+    const slot = candidateSlots.find(([x, y]) => isInsideFootprint(x, y)
+      && !placedAmenities.some((item) => item.level === selectedLevel && Math.abs(item.x - x) < 0.08 && Math.abs(item.y - y) < 0.08))
+    if (!slot) {
+      setAmenityStatus('The quick-place slots are full. Drag an item into an open part of the floor plan instead.')
+      return
+    }
     placeAmenity(kind, slot[0], slot[1])
   }
   const dropAmenity = (event: React.DragEvent<SVGSVGElement>): void => {
@@ -1548,6 +1586,8 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
                 {rooms.map((room, index) => {
                   const roomWidth = 270 + ((length - 24) / 24) * 150
                   const x = 350 - roomWidth / 2
+                  const amenityWidth = footprint === 'circular' ? Math.min(roomWidth, 58) : roomWidth
+                  const amenityOffset = (roomWidth - amenityWidth) / 2
                   const y = 101 + index * 74
                   return (
                     <g key={`${index}-${room}`}>
@@ -1557,7 +1597,7 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
                       <text x={x + 15} y={y + 42} fill="#bac6c1" fontFamily="monospace" fontSize="9">LEVEL {String(index + 1).padStart(2, '0')} / CONCEPT</text>
                       {placedAmenities.filter((item) => item.level === index).map((item) => {
                         const amenity = amenityOptions.find((candidate) => candidate.key === item.kind)!
-                        const boxX = x + roomWidth * item.x - 5
+                        const boxX = x + amenityOffset + amenityWidth * item.x - 5
                         const boxY = y + 17 + item.y * 18
                         return <rect key={item.id} x={boxX} y={boxY} width="11" height="11" rx="2" fill={amenity.color} stroke="#f5edd9" strokeWidth="1.5"><title>{amenity.label} on Level {index + 1}</title></rect>
                       })}
@@ -1565,6 +1605,8 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
                   )
                 })}
                 <text x="42" y={Math.max(145, 101 + rooms.length * 74 + 14)} fill="#b7c2b9" fontFamily="monospace" fontSize="10">{length} ft × {width} ft / {rooms.length} LEVEL{rooms.length > 1 ? 'S' : ''} / {finishData.label.toUpperCase()}</text>
+                <text x="42" y={101 + rooms.length * 74 + 30} fill="#b7c2b9" fontFamily="monospace" fontSize="8">POWER: {systems.power.toUpperCase()} / WATER: {systems.water.toUpperCase()}</text>
+                <text x="42" y={101 + rooms.length * 74 + 43} fill="#b7c2b9" fontFamily="monospace" fontSize="8">AIR: {systems.air.toUpperCase()} / CONTROLS: {systems.controls.toUpperCase()}</text>
               </svg>
               <span className="studio-model-tag">SECTION A–A / STUDY {String(rooms.length).padStart(2, '0')}</span>
             </div>
@@ -1582,7 +1624,7 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
             />
             <div className="studio-3d-tools">
               <div className="studio-panel-title"><span>LIVE SPATIAL MODEL</span><Compass size={15} /></div>
-              <Screen3DPreview finishColor={finishData.color} shape={footprint} amenities={placedAmenities} level={selectedLevel} stairs={stairs} lift={lift} />
+              <Screen3DPreview finishColor={finishData.color} shape={footprint} amenities={placedAmenities} level={selectedLevel} stairs={stairs} lift={lift} systems={systems} lengthFeet={length} widthFeet={width} />
             </div>
             <div className="studio-system-summary" aria-label="Selected building system concepts">
               <span><strong>POWER</strong>{powerOptions.find((item) => item.key === systems.power)!.label}</span>
@@ -1716,6 +1758,7 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
         selectedLevel={selectedLevel}
         stairs={stairs}
         lift={lift}
+        systems={systems}
         collaborator={collaborator}
         voiceAllowed={voicePermission}
         onClose={() => setVrOpen(false)}
