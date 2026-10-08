@@ -1,49 +1,57 @@
-# Enter Sanctum SubTerranean Private Construction
+# Community Blueprint Genie
 
-> A privacy-focused shelter-planning and inquiry application for a Central Texas carpenter.
+> A community-planning application concept for preparing safer places and support plans for catastrophes.
 
-The public planner runs entirely in the visitor's browser. Production inquiry intake, staff triage, claim governance, and disclosure-cleared case studies utilize Next.js route handlers and a Neon PostgreSQL database.
+Community Blueprint Genie is evolving from a subterranean shelter-design prototype into a broader tool for neighbors, community groups, local organizations, and qualified professionals to explore safety-place concepts and coordinate preparedness planning. The design studio is one part of that goal: the application should also help communities understand needs, compare options, plan accessibility and essential services, document open questions, and prepare for professional and local-authority review.
 
 ---
 
-## Architecture & Privacy Model
+## Product direction
 
-### Client-Side Privacy & Storage
-* **Local-First Planning**: Prior to explicit submission, planning drafts are encrypted with a passphrase and saved strictly within `localStorage`. Passphrases never touch the server. If site data is cleared or the passphrase is lost, the draft cannot be recovered.
-* **Passphrase-Protected Collaboration**: Contact-free JSON and encrypted co-review files are generated directly within the browser. The co-review passphrase must be transferred out-of-band via a separate channel.
-* **Zero Form Analytics**: No tracking or input analytics exist for planner fields. Infrastructure providers (hosting, identity, database) handle technical network metadata under their respective terms.
-* **Local Hardware & Permissions**:
-  * Voice controls rely on native browser Web Speech capabilities, not external AI voice services.
-  * Voice input requires explicit runtime opt-in because the browser provider may process audio externally.
-  * The `Permissions-Policy` explicitly permits microphone access only for the same-origin voice feature. Camera and geolocation access are disabled.
-  * WebXR room preview functions exclusively on compatible browsers paired with a supported VR/AR headset.
+This is a prototype, not an emergency-management system or operational shelter directory. The long-term plan is documented in [plans.md](./plans.md), including the community-planning workflow, accessibility and operations needs, design-model work, estimates, professional review, AI collaboration, shared VR, and release gates.
 
-### Submission & Server Security
-* **Inquiry Intake**: Submissions transfer redacted planning briefs alongside visitor contact details over HTTPS. Payloads are encrypted application-side before persistence to Neon.
-* **Ephemeral Confirmation**: Receipt keys and inquiry reference identifiers display on-screen once. The application dispatches no SMS or email notifications.
-* **Separation of Sensitive Site Data**: Exact property and site records are barred from the general inquiry pipeline. They reside exclusively in the staff assessment workflow, unlocked only after an executed NDA and encrypted under an isolated encryption key.
-* **Runtime CSP Nonces**: A strict, per-request nonce Content Security Policy is enforced by [`proxy.ts`](./proxy.ts). Dynamic server rendering injects nonces directly into authorized script tags.
-* **Boundary & Compliance Scope**: The compliance interface pulls county vectors via the U.S. Census Bureau TIGERweb `State_County` layer over an allow-listed internal route. Only county FIPS selections are transmitted; addresses, coordinates, and parcel IDs are excluded.
+### What the prototype offers
 
-### Design studio scope
-The local-first studio explores schematic footprints, expandable levels, visual finish concepts, room programs, and space-planning markers. The 2D plan editor, interactive browser 3D preview, and compatible-device WebXR view are concept visualizations; they do not form a measured, coordinated building-information model.
+- A subterranean concept studio with schematic footprints, multiple levels, finish alternatives, stairs, elevator/lift options, selected building-system studies, and space-planning markers.
+- Preliminary cost and labor allowances intended to support early discussion, not to quote or commit to work.
+- A 2D plan editor, browser 3D preview, and WebXR view on compatible devices.
+- A community-facing research workspace with Census TIGERweb county outlines and a human-maintained source register.
+- An individual planning brief and file-based co-review workflow.
+- A rules-based Blueprint Genie persona prototype; it does not connect to an LLM.
 
-Selected finishes and building systems affect the concept visuals; stairs, lifts, power, water, ventilation, and controls are study options. Cost, design-fee, labor, and timeline values are speculative model allowances, not researched local rates, bids, or commitments. Downloads are concept notes and schematic artwork—not engineered plans, blueprints, construction documents, specifications, a safety plan, or permit-ready work.
+These capabilities do not yet make the application a community coordination, emergency-management, or shelter-operations platform. Needs assessment, shared community governance, emergency communications, staffed operations, supply tracking, verified shelter availability, shared VR sessions, and a connected AI collaborator are not implemented.
 
-The compliance research workspace offers an allow-listed Census TIGERweb county outline and a human-maintained source register. County geography does not establish parcel boundaries, municipal or ETJ jurisdiction, zoning, permit authority, licensing, site conditions, or code compliance. Notes and search leads require verification against current authoritative sources and review by the appropriate authority and qualified professionals.
+### Design, research, and safety boundaries
 
-The selectable Blueprint Genie persona is a local rules-based prototype. No LLM is connected. The VR session is single-device: invitations, guest participants, shared rooms, and spatial voice chat are not implemented. Specialist role suggestions are not vetted vendors, referrals, labor availability, or a contractor network.
+- The plan editor, 3D preview, and compatible-device VR are concept visualizations, not a measured or coordinated building-information model. Material and system selections are visual/planning alternatives, not verified product specifications.
+- Cost, design-fee, labor, and timeline values are speculative allowances, not researched local rates, bids, or commitments. Specialist role suggestions are not vetted vendors, referrals, labor availability, or a contractor network.
+- Census county boundaries do not establish parcel boundaries, municipal or ETJ jurisdiction, zoning, permit authority, licensing, site conditions, or code compliance. Research notes and search leads need verification against current authoritative sources and qualified review.
+- Co-review uses readable JSON files. Planning answers are held in page memory and clear when the page is reloaded or closed. These files are not encrypted; review the contents before sharing.
+- VR is currently a single-device experience. Invitations, guest participants, shared rooms, and spatial voice chat are not implemented. The Blueprint Genie persona is rules-based; no LLM is connected.
 
 > [!WARNING]
-> **Emergency & Planning Disclaimers**
-> * **Do not report emergencies**: This system is not monitored for urgent or life-safety events.
-> * **Planning aids only**: System models (lifts, stairs, ventilation, structural layouts, hybrid microgrids, solar/storage, water treatment) represent conceptual design studies—not structural calculations, engineering drawings, code compliance checks, or egress approvals.
-> * **Professional verification**: Geotechnical, seismic, structural, electrical, and environmental specifications require qualified engineering certification prior to execution.
-> * **Worker safety**: Acknowledging a checklist is not evidence of completed reviews or safety controls. No checkbox, estimate, AI concept, or exported file can override missing site data, professional review, permits, or an enforceable worker-safety plan.
+> **Emergency and life-safety boundary**
+> * **Not an emergency service**: The application is not monitored for urgent or life-safety events. In an emergency, follow current local official alerts and contact emergency services.
+> * **Not an official shelter directory**: A concept or planning entry does not mean a place is open, staffed, supplied, accessible, available, or endorsed by local authorities.
+> * **Planning aids only**: Models of lifts, stairs, ventilation, structure, energy, water, and other systems are conceptual studies—not structural calculations, engineering drawings, code checks, or egress approvals.
+> * **Qualified review required**: Site, geotechnical, structural, civil, electrical, environmental, accessibility, code, and emergency-operations questions require the responsible qualified professionals and authorities.
+> * **Worker safety is mandatory**: Acknowledging a checklist is not evidence of completed reviews or controls. No estimate, AI concept, participant, or export can override missing site data, required reviews, permits, or an enforceable worker-safety plan.
+
+## Community planning goals
+
+The product direction is to help communities:
+
+1. Identify who may need support and which accessibility, medical, language, transportation, and caregiving needs should be considered.
+2. Review hazards, existing resources, and dated authoritative information without claiming that a map determines site suitability or jurisdiction.
+3. Explore a range of safety-place concepts and non-building alternatives.
+4. Discuss proposals, document unresolved questions, assign follow-up, and prepare for qualified review.
+5. Consider construction, operations, maintenance, staffing, supplies, funding assumptions, and lifecycle costs.
+
+These are product goals, not a claim that the current prototype performs these functions end to end.
 
 ## Deferred work and placeholders
 
-Requested capabilities that are not implemented as production features are documented in [`docs/roadmap/`](./docs/roadmap/README.md). These files describe boundaries and planning criteria only; they are not active integrations or commitments:
+The detailed staged roadmap is in [plans.md](./plans.md). Unimplemented capabilities and their boundaries are also documented in [`docs/roadmap/`](./docs/roadmap/README.md). These files describe planning criteria only; they are not active integrations or commitments:
 
 * [Shared VR and spatial collaboration](./docs/roadmap/multi-user-vr.md)
 * [LLM Blueprint Genie integration](./docs/roadmap/ai-collaborator.md)
@@ -54,6 +62,16 @@ Requested capabilities that are not implemented as production features are docum
 Current application validation requirements and any known release blockers are tracked in the [release validation placeholder](./docs/roadmap/release-validation.md).
 
 ---
+
+## Application architecture
+
+- The application is built with Next.js, React, and TypeScript. New TypeScript should use explicit types and avoid `any`.
+- Public concept planning runs in the browser. In-progress planning answers are held in page memory; reload or tab close clears them.
+- Consultation requests use Next.js route handlers and Neon PostgreSQL. Submitted inquiry payloads are encrypted server-side before database persistence; this is separate from the readable, user-managed co-review JSON files.
+- Staff workflows use Auth.js with an OIDC workforce identity provider. Exact site assessment data follows a separate staff workflow and isolated encryption key.
+- The application uses a per-request nonce Content Security Policy configured through [`proxy.ts`](./proxy.ts).
+- County-boundary lookups use the U.S. Census Bureau TIGERweb county layer through an allow-listed internal route. The boundary is for broad research context only.
+- WebXR is optional and depends on the browser and compatible headset. A headset is not required for the planning concept.
 
 ## Prerequisites
 

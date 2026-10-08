@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { assessPhysicalEnvelope, buildPrivateBrief, getUnresolvedItems, type PlanningDraft } from './planning'
+import { assessPhysicalEnvelope, buildPlanningBrief, getUnresolvedItems, type PlanningDraft } from './planning'
 
 const draft: PlanningDraft = {
   goal: 'Storm shelter',
@@ -21,7 +21,7 @@ const draft: PlanningDraft = {
 
 describe('private planning brief', () => {
   it('redacts selected fields and keeps the shared brief contact-free', () => {
-    const brief = buildPrivateBrief(draft)
+    const brief = buildPlanningBrief(draft)
 
     expect(brief.goal).toBe('Storm shelter')
     expect(brief.occupancy).toBe('Withheld')
@@ -33,7 +33,7 @@ describe('private planning brief', () => {
   })
 
   it('masks feasibility details and unresolved items together', () => {
-    const brief = buildPrivateBrief({ ...draft, redactions: { ...draft.redactions, feasibility: true } })
+    const brief = buildPlanningBrief({ ...draft, redactions: { ...draft.redactions, feasibility: true } })
 
     expect(brief.projectType).toBe('Withheld')
     expect(brief.feasibility).toBe('Withheld')
@@ -45,7 +45,7 @@ describe('private planning brief', () => {
   })
 
   it('keeps owner priorities redacted when selected', () => {
-    const brief = buildPrivateBrief({
+    const brief = buildPlanningBrief({
       ...draft,
       redactions: { ...draft.redactions, priorities: true },
     })

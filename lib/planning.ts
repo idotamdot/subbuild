@@ -74,11 +74,11 @@ export function comparePriorities(owner: string[], coReviewer: string[]) {
   }
 }
 
-export function buildPrivateBrief(draft: PlanningDraft) {
+export function buildPlanningBrief(draft: PlanningDraft) {
   const maskFeasibility = draft.redactions.feasibility
   const envelope = assessPhysicalEnvelope(draft)
   return {
-    title: 'Private shelter planning brief',
+    title: 'Shelter planning brief',
     version: 'Guidance rules 1.0',
     preparedOn: new Date().toISOString().slice(0, 10),
     notice: 'Planning guidance only. Not an engineered recommendation, permit, or safety approval.',

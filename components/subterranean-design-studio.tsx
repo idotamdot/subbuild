@@ -672,6 +672,9 @@ function Screen3DPreview({ finishColor, shape, amenities, level, stairs, lift, s
       if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program) ?? 'The 3D preview shader could not link.')
       const activeProgram: WebGLProgram = program
       gl.useProgram(activeProgram)
+      const vertices = screenSceneVertices(shape, finishColor, amenities, level, stairs, lift, systems, lengthFeet, widthFeet)
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+      gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
       const position = gl.getAttribLocation(activeProgram, 'position')
       const color = gl.getAttribLocation(activeProgram, 'color')
       gl.enableVertexAttribArray(position)
@@ -680,9 +683,6 @@ function Screen3DPreview({ finishColor, shape, amenities, level, stairs, lift, s
       gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 24, 12)
       gl.enable(gl.DEPTH_TEST)
       gl.disable(gl.CULL_FACE)
-      const vertices = screenSceneVertices(shape, finishColor, amenities, level, stairs, lift, systems, lengthFeet, widthFeet)
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-      gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
       drawRef.current = () => {
         const rect = canvas.getBoundingClientRect()
         const ratio = Math.min(window.devicePixelRatio || 1, 2)
