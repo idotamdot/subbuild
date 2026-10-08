@@ -1204,6 +1204,7 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
       '',
       '## Design snapshot',
       `- Concept footprint: ${length} ft × ${width} ft per level`,
+      `- Plan shape concept: ${footprintOptions.find((item) => item.key === footprint)!.label} (the displayed room outline is schematic, not a surveyed net area)`,
       `- Levels: ${rooms.length}`,
       `- Concept area: ${estimate.area.toLocaleString()} sq ft`,
       `- Room program: ${rooms.map((room, index) => `Level ${index + 1}: ${room}`).join('; ')}`,
@@ -1214,6 +1215,7 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
       `- Water concept: ${waterOptions.find((item) => item.key === systems.water)!.label}`,
       `- Air concept: ${airOptions.find((item) => item.key === systems.air)!.label}`,
       `- Controls concept: ${controlOptions.find((item) => item.key === systems.controls)!.label}`,
+      `- Interior planning markers: ${placedAmenities.length === 0 ? 'none placed' : placedAmenities.map((item) => `${amenityOptions.find((option) => option.key === item.kind)!.label} on level ${item.level + 1}`).join(', ')}`,
       '- Site location: not collected by this browser-only studio',
       '',
       '## Materials and systems to review',
@@ -1299,7 +1301,17 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
             </div>
             <p className="studio-footnote">Finish changes are visual studies only—not a structural material recommendation.</p>
 
-            <div className="studio-panel-title"><span>03 / ADD A LEVEL</span><Plus size={16} /></div>
+            <div className="studio-panel-title"><span>03 / SHAPE THE FOOTPRINT</span><Layers3 size={16} /></div>
+            <div className="studio-access-group" role="group" aria-label="Choose a conceptual floor plan">
+              {footprintOptions.map((option) => (
+                <button key={option.key} className={`studio-access-option ${footprint === option.key ? 'active' : ''}`} type="button" onClick={() => setFootprint(option.key)} aria-pressed={footprint === option.key}>
+                  <strong>{option.label}</strong><span>Approx. {Math.round(footprint === option.key ? ({ rectangular: 1, 'l-shaped': 0.78, octagonal: 0.9, circular: Math.PI / 4 } satisfies Record<FootprintKey, number>)[option.key] * length * width : 0).toLocaleString()} sq ft / level · schematic</span>
+                </button>
+              ))}
+            </div>
+            <p className="studio-footnote">Footprint areas are rough plan-study areas, not surveyed net floor areas. Geometry is illustrative; dimensions and wall systems require professional design.</p>
+
+            <div className="studio-panel-title"><span>04 / ADD A LEVEL</span><Plus size={16} /></div>
             <div className="studio-floor-stepper">
               <button className="studio-icon-button" type="button" onClick={removeFloor} disabled={rooms.length === 1} aria-label="Remove the deepest level"><Minus size={16} /></button>
               <span><strong>{rooms.length}</strong> {rooms.length === 1 ? 'level' : 'levels'} in this concept</span>
@@ -1307,7 +1319,7 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
             </div>
             <p className="studio-footnote">Add levels to explore a larger program. More levels increase uncertainty and require a deeper professional review.</p>
 
-            <div className="studio-panel-title"><span>04 / STAIRS + VERTICAL ACCESS</span><Layers3 size={16} /></div>
+            <div className="studio-panel-title"><span>05 / STAIRS + VERTICAL ACCESS</span><Layers3 size={16} /></div>
             <p className="studio-footnote">Compare visual access strategies. They are concept options only—not code, egress, accessibility, or equipment specifications.</p>
             <div className="studio-access-group" role="group" aria-label="Choose a conceptual stair type">
               <span className="studio-access-label">STAIR CONCEPT</span>
@@ -1328,22 +1340,32 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
             <div className="studio-access-tech"><Gauge size={15} /><span><strong>Technology review prompts:</strong> regenerative drives, machine-room-less layouts, remote diagnostics, emergency communications, and backup-power interfaces. Availability and suitability must be verified by licensed lift and life-safety specialists.</span></div>
             <p className="studio-footnote">A lift is not a substitute for required stairs or a reviewed emergency-egress strategy. Confirm accessibility, flood exposure, maintenance, rescue procedures, and power-loss response for the actual site.</p>
 
-            <div className="studio-panel-title"><span>05 / RESILIENT BUILDING SYSTEMS</span><Gauge size={16} /></div>
+            <div className="studio-panel-title"><span>06 / RESILIENT BUILDING SYSTEMS</span><Gauge size={16} /></div>
             <p className="studio-footnote">Choose concept pathways; no energy independence, potable water, safe air, or equipment performance is calculated or guaranteed.</p>
             <SystemChoiceGroup label="POWER + STORAGE" options={powerOptions} selected={systems.power} onSelect={(power) => setSystems((current) => ({ ...current, power }))} />
             <SystemChoiceGroup label="WATER + TREATMENT" options={waterOptions} selected={systems.water} onSelect={(water) => setSystems((current) => ({ ...current, water }))} />
             <SystemChoiceGroup label="VENTILATION + AIR QUALITY" options={airOptions} selected={systems.air} onSelect={(air) => setSystems((current) => ({ ...current, air }))} />
             <SystemChoiceGroup label="COMPUTERIZED CONTROLS" options={controlOptions} selected={systems.controls} onSelect={(controls) => setSystems((current) => ({ ...current, controls }))} />
             <div className="studio-access-tech"><CircleAlert size={15} /><span><strong>Material / seismic gate:</strong> a finish swatch is not a structural material choice. Compare verified unit weight, strength, seismic mass, connections, and soil interaction only with site-specific geotechnical data and licensed structural engineering.</span></div>
+            <div className="studio-panel-title"><span>07 / PLACE INTERIOR CONCEPT ITEMS</span><Box size={16} /></div>
+            <p className="studio-footnote">Select an item to place it in the plan. These symbols represent space-planning placeholders, not equipment, access clearances, or safe egress dimensions.</p>
+            <div className="studio-amenity-palette" aria-label="Amenity palette">
+              {amenityOptions.map((item) => (
+                <button key={item.key} type="button" draggable onDragStart={(event) => event.dataTransfer.setData('text/plain', item.key)} onClick={() => addAmenity(item.key)} aria-label={`Add ${item.label} to the selected level`}>
+                  <span style={{ '--amenity-color': item.color } as React.CSSProperties} /><strong>{item.label}</strong>
+                </button>
+              ))}
+            </div>
+            <p className="studio-footnote" role="status">{amenityStatus || `${placedAmenities.length} items placed across ${rooms.length} conceptual levels.`}</p>
           </div>
 
           <div className="studio-model-column">
             <div className="studio-model-toolbar"><span><span className="studio-live-dot" /> LIVE SECTION / SCHEMATIC</span><span>SCROLL TO EXPLORE</span></div>
-            <div className="studio-model" role="img" aria-label={`Conceptual cross section, ${rooms.length} level${rooms.length > 1 ? 's' : ''}, ${length} by ${width} feet per level, ${finishData.label}, ${stairs} stairs, ${lift} lift`}>
+            <div className="studio-model" role="img" aria-label={`Conceptual cross section, ${rooms.length} level${rooms.length > 1 ? 's' : ''}, ${length} by ${width} feet per level, ${footprint} plan, ${finishData.label}, ${stairs} stairs, ${lift} lift`}>
               <div className="studio-model-grid" />
               <svg viewBox={`0 0 700 ${Math.max(420, 101 + rooms.length * 74 + 42)}`} role="img" aria-labelledby="studio-section-title studio-section-description">
                 <title id="studio-section-title">Expandable underground concept section</title>
-                <desc id="studio-section-description">A conceptual {rooms.length}-level underground room layout. Selected finish: {finishData.label}. The drawing is schematic, not for construction.</desc>
+                <desc id="studio-section-description">A conceptual {rooms.length}-level {footprint} underground room layout. Selected finish: {finishData.label}. It shows {stairs} stairs, {lift} lift, and {placedAmenities.length} space-planning items. The drawing is schematic, not for construction.</desc>
                 <defs>
                   <pattern id="concrete-live" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#39484a"/><path d="M-4 16L16 -4M4 20L20 4" stroke="#8aa0a0" strokeOpacity=".32" /></pattern>
                   <pattern id="shotcrete-live" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#554a3d"/><circle cx="4" cy="5" r="1.6" fill="#bca782" fillOpacity=".62"/><circle cx="11" cy="10" r="1.1" fill="#d0c1a5" fillOpacity=".48"/></pattern>
@@ -1378,17 +1400,28 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
                   const y = 101 + index * 74
                   return (
                     <g key={`${index}-${room}`}>
-                      <rect x={x} y={y} width={roomWidth} height="58" fill={`url(#${finishData.pattern}-live)`} stroke={finishData.color} strokeWidth="2" />
+                      <path d={footprintPath(x, y, roomWidth, 58, footprint)} fill={`url(#${finishData.pattern}-live)`} stroke={finishData.color} strokeWidth="2" />
                       <path d={`M${x + 8} ${y + 49}h${roomWidth - 16}`} stroke="#d9c6a7" strokeOpacity=".72" />
                       <text x={x + 15} y={y + 24} fill="#f4eee2" fontFamily="Arial, sans-serif" fontSize="12" fontWeight="600">{room}</text>
                       <text x={x + 15} y={y + 42} fill="#bac6c1" fontFamily="monospace" fontSize="9">LEVEL {String(index + 1).padStart(2, '0')} / CONCEPT</text>
-                      <circle cx={x + roomWidth - 18} cy={y + 19} r="4" fill="#c6ae80" />
+                      {placedAmenities.filter((item) => item.level === index).map((item) => {
+                        const amenity = amenityOptions.find((candidate) => candidate.key === item.kind)!
+                        const boxX = x + roomWidth * item.x - 5
+                        const boxY = y + 17 + item.y * 18
+                        return <g key={item.id} role="button" tabIndex={0} aria-label={`Remove ${amenity.label} from level ${index + 1}`} onClick={() => setPlacedAmenities((current) => current.filter((entry) => entry.id !== item.id))} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') setPlacedAmenities((current) => current.filter((entry) => entry.id !== item.id)) }} style={{ cursor: 'pointer' }}>
+                          <rect x={boxX} y={boxY} width="11" height="11" rx="2" fill={amenity.color} stroke="#f5edd9" strokeWidth="1.5" />
+                        </g>
+                      })}
                     </g>
                   )
                 })}
                 <text x="42" y={Math.max(145, 101 + rooms.length * 74 + 14)} fill="#b7c2b9" fontFamily="monospace" fontSize="10">{length} ft × {width} ft / {rooms.length} LEVEL{rooms.length > 1 ? 'S' : ''} / {finishData.label.toUpperCase()}</text>
               </svg>
               <span className="studio-model-tag">SECTION A–A / STUDY {String(rooms.length).padStart(2, '0')}</span>
+            </div>
+            <div className="studio-3d-tools">
+              <div className="studio-panel-title"><span>LIVE SPATIAL MODEL</span><Compass size={15} /></div>
+              <Screen3DPreview finishColor={finishData.color} shape={footprint} amenities={placedAmenities} level={selectedLevel} stairs={stairs} lift={lift} />
             </div>
             <div className="studio-system-summary" aria-label="Selected building system concepts">
               <span><strong>POWER</strong>{powerOptions.find((item) => item.key === systems.power)!.label}</span>

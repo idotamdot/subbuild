@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { estimateConcept, type BuildingSystems } from './design-estimates'
+import { estimateConcept, type BuildingSystems, type FootprintKey } from './design-estimates'
 
 const baselineSystems: BuildingSystems = {
   power: 'grid-resilient',
@@ -124,5 +124,23 @@ describe('concept estimates', () => {
     expect(enhanced.totalHigh).toBeGreaterThan(basic.totalHigh)
     expect(enhanced.laborHighHours).toBeGreaterThan(basic.laborHighHours)
     expect(enhanced.systemsBasis).toContain('no loads, yields, water quality, airflow')
+  })
+
+  it('uses distinct approximate areas for the footprint studies', () => {
+    const estimateFootprint = (footprint: FootprintKey): number => estimateConcept({
+      finish: 'reinforced-concrete',
+      footprint,
+      lengthFeet: 24,
+      widthFeet: 16,
+      floors: 1,
+      stairs: 'switchback',
+      lift: 'none',
+      systems: baselineSystems,
+    }).area
+
+    expect(estimateFootprint('rectangular')).toBe(384)
+    expect(estimateFootprint('l-shaped')).toBeCloseTo(299.52)
+    expect(estimateFootprint('octagonal')).toBeCloseTo(345.6)
+    expect(estimateFootprint('circular')).toBeCloseTo(301.59, 1)
   })
 })
