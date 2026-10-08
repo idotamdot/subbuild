@@ -10,7 +10,7 @@ const hazardScenarios = [
     category: 'Geological',
     summary: 'Plan for shaking, aftershocks, service outages, accessible reunification, and safe re-entry decisions.',
     actions: ['Identify local official alerts and building-safety guidance', 'Agree on accessible household and community check-in methods', 'List water, power, medical, and communications dependencies'],
-    sourceIds: ['ready', 'usgs-earthquake'],
+    sourceIds: ['ifrc', 'undrr', 'ready', 'usgs-earthquake'],
   },
   {
     id: 'flood',
@@ -18,7 +18,7 @@ const hazardScenarios = [
     category: 'Water',
     summary: 'Consider flash flooding, river flooding, storm surge, routes that may be cut off, and accessible evacuation support.',
     actions: ['Find official local flood and evacuation information', 'Identify routes and support options without assuming any route is passable', 'Plan for medication, mobility aids, pets, and communication needs'],
-    sourceIds: ['ready', 'noaa'],
+    sourceIds: ['ifrc', 'undrr', 'ready', 'noaa'],
   },
   {
     id: 'volcano',
@@ -26,7 +26,15 @@ const hazardScenarios = [
     category: 'Geological',
     summary: 'Use local volcano observatory and civil-protection sources for ashfall, lava, lahars, gases, and evacuation information.',
     actions: ['Locate the responsible volcano observatory and civil-protection authority', 'Record only official, dated hazard and evacuation source links', 'Plan for ash-related health, transport, power, water, and supply disruption'],
-    sourceIds: ['usgs-volcano', 'ready'],
+    sourceIds: ['ifrc', 'undrr', 'usgs-volcano', 'ready'],
+  },
+  {
+    id: 'tsunami-landslide',
+    title: 'Tsunami & landslide',
+    category: 'Geological / water',
+    summary: 'Discuss locally relevant warning sources, accessible evacuation coordination, and service disruption without assuming a route or place is safe.',
+    actions: ['Identify the responsible local warning and civil-protection authorities', 'Discuss accessible ways to receive and share official instructions', 'Plan support for people who may need help moving or reconnecting'],
+    sourceIds: ['ifrc', 'undrr', 'gdacs'],
   },
   {
     id: 'severe-weather',
@@ -34,23 +42,47 @@ const hazardScenarios = [
     category: 'Atmospheric',
     summary: 'Prepare for locally relevant storms, extreme heat or cold, wind, wildfire smoke, and prolonged utility interruption.',
     actions: ['Subscribe to official local weather and emergency alerts', 'List accessible cooling, warming, and communications alternatives', 'Assign a way to check on neighbors who may need support'],
-    sourceIds: ['ready', 'noaa'],
+    sourceIds: ['ifrc', 'undrr', 'ready', 'noaa'],
+  },
+  {
+    id: 'wildfire-drought',
+    title: 'Wildfire, heat & drought',
+    category: 'Climate / environmental',
+    summary: 'Consider locally relevant smoke, heat, water scarcity, power disruption, and accessible community support needs.',
+    actions: ['Find current local health, weather, fire, and water-authority information', 'Discuss support needs for cooling, clean air, hydration, and transport', 'Identify continuity questions for care, power-dependent equipment, and essential services'],
+    sourceIds: ['ifrc', 'undrr', 'who'],
   },
   {
     id: 'public-health',
-    title: 'Public-health emergency',
+    title: 'Epidemic / pandemic',
     category: 'Health',
     summary: 'Coordinate continuity of care, trusted health information, accessible communication, and community support.',
     actions: ['Identify local public-health and healthcare authority updates', 'Plan continuity questions with qualified care providers', 'Prepare accessible, multilingual ways to share verified updates'],
-    sourceIds: ['cdc', 'who'],
+    sourceIds: ['ifrc', 'who', 'cdc'],
+  },
+  {
+    id: 'meteor',
+    title: 'Meteor shower / impact exercise',
+    category: 'Rare-event tabletop only',
+    summary: 'A meteor shower is not an impact warning. Any impact scenario here is speculative tabletop fiction—not a prediction, detection, or assessment of local risk.',
+    actions: ['Keep the exercise clearly labeled as speculative', 'Practice continuity and verified-information handoffs, not impact forecasting', 'Do not infer a threat, impact location, blast zone, or protective action from this planner'],
+    sourceIds: ['ifrc', 'undrr'],
   },
   {
     id: 'space-weather',
-    title: 'Meteorite / space-weather contingency',
-    category: 'Rare-event exercise',
-    summary: 'Use this as a low-probability preparedness exercise. Separate meteorite-impact speculation from monitored space-weather advisories and verified local hazards.',
-    actions: ['Use official agencies for actual space-weather notices', 'Exercise communications, power, transport, and service-continuity dependencies', 'Do not infer impact predictions, blast zones, or protective actions from this planner'],
-    sourceIds: ['noaa-space'],
+    title: 'Space weather',
+    category: 'Space environment',
+    summary: 'Discuss how official space-weather advisories could affect communications, navigation, and power-dependent services; this planner does not monitor solar activity.',
+    actions: ['Identify the relevant official space-weather and local civil-protection sources', 'List community services that depend on communications, navigation, or power', 'Use service-provider and authority guidance for any actual disruption'],
+    sourceIds: ['noaa-space', 'ifrc'],
+  },
+  {
+    id: 'conflict',
+    title: 'Conflict & displacement',
+    category: 'Humanitarian preparedness',
+    summary: 'Center civilian safety, accessible information, family links, essential services, and support for displaced people. Follow trusted humanitarian and local authority guidance.',
+    actions: ['Identify trusted, current humanitarian and civil-protection information sources', 'Discuss inclusive support, family contact, and continuity of essential care', 'Do not publish sensitive locations or identifying information about at-risk people'],
+    sourceIds: ['ifrc', 'unhcr', 'icrc'],
   },
   {
     id: 'infrastructure',
@@ -58,15 +90,15 @@ const hazardScenarios = [
     category: 'Cascading event',
     summary: 'Explore how overlapping power, water, transport, communications, supply, or facility outages affect community support.',
     actions: ['Map critical services and identify a source and owner for each dependency', 'Plan manual communications and offline copies of essential information', 'Coordinate continuity questions with responsible service providers'],
-    sourceIds: ['ready', 'who'],
+    sourceIds: ['ifrc', 'undrr', 'who'],
   },
   {
     id: 'speculative',
-    title: 'Speculative / unknown event',
-    category: 'Tabletop exercise only',
-    summary: 'A fictional scenario can test flexible coordination and continuity. It is not a prediction, verified threat, or operational warning.',
-    actions: ['Keep the exercise clearly labeled as fictional', 'Test needs reporting, accessible communications, and decision handoffs', 'Use official emergency instructions for every real-world event'],
-    sourceIds: ['ready'],
+    title: 'Unknown event / fictional alien scenario',
+    category: 'Fictional tabletop only',
+    summary: 'An alien-invasion scenario is fiction, not a real-world threat assessment. Use it only to exercise flexible communication, inclusion, and continuity.',
+    actions: ['Clearly label every prompt and output as fictional', 'Test accessible communications and human decision handoffs', 'Never present the scenario as a verified threat or emergency instruction'],
+    sourceIds: ['ifrc', 'undrr'],
   },
 ] as const
 
@@ -80,6 +112,11 @@ type PreparednessSource = {
 }
 
 const sources: readonly PreparednessSource[] = [
+  { id: 'ifrc', name: 'IFRC', scope: 'International Red Cross and Red Crescent disaster preparedness', url: 'https://www.ifrc.org/our-work/disasters-climate-and-crises' },
+  { id: 'undrr', name: 'UNDRR', scope: 'United Nations disaster risk reduction', url: 'https://www.undrr.org/' },
+  { id: 'gdacs', name: 'GDACS', scope: 'Global Disaster Alert and Coordination System', url: 'https://www.gdacs.org/' },
+  { id: 'unhcr', name: 'UNHCR', scope: 'International protection and displacement information', url: 'https://www.unhcr.org/' },
+  { id: 'icrc', name: 'ICRC', scope: 'International humanitarian information', url: 'https://www.icrc.org/' },
   { id: 'ready', name: 'Ready.gov', scope: 'U.S. preparedness guidance', url: 'https://www.ready.gov/' },
   { id: 'usgs-earthquake', name: 'USGS Earthquake Hazards Program', scope: 'U.S. earthquake information', url: 'https://www.usgs.gov/programs/earthquake-hazards' },
   { id: 'usgs-volcano', name: 'USGS Volcano Hazards Program', scope: 'U.S. volcano science and observatories', url: 'https://www.usgs.gov/programs/VHP' },
@@ -163,7 +200,7 @@ export default function CommunityPreparednessWorkspace() {
       <div className="shell section">
         <div className="section-heading preparedness-heading">
           <div>
-            <span className="eyebrow">COMMUNITY READINESS / ALL-HAZARDS PLANNING</span>
+            <span className="eyebrow">COMMONGROUND ATLAS / ALL-HAZARDS PLANNING</span>
             <h2 id="preparedness-title">Prepare together. Protect more lives.</h2>
           </div>
           <p>No tool can promise to save everyone. Communities can make readiness more inclusive by practicing together, using current official guidance, and planning support before it is needed.</p>
@@ -181,7 +218,7 @@ export default function CommunityPreparednessWorkspace() {
               <div><span className="card-number">01 / SCENARIO EXPLORER</span><h3 id="scenario-title">What should your community prepare for?</h3></div>
             </div>
             <p className="preparedness-copy">Choose a scenario to bring up discussion prompts and relevant official information sources. Sources open at the agency; they are not live integrations.</p>
-            <div className="scenario-grid" role="group" aria-label="Disaster preparedness scenarios">
+            <div className="scenario-grid" role="group" aria-label="Community preparedness scenarios">
               {hazardScenarios.map((scenario) => (
                 <button
                   className={`scenario-option${selectedScenarioId === scenario.id ? ' selected' : ''}`}

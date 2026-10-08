@@ -1,8 +1,8 @@
-# Community Blueprint Genie
+# CommonGround Atlas
 
-> A community-planning application concept for preparing safer places and support plans for catastrophes.
+> A global community-readiness concept: a shared place to explore preparedness, compare trusted public resources, and plan inclusive conversations about hazards and continuity.
 
-Community Blueprint Genie is evolving from a subterranean shelter-design prototype into a broader tool for neighbors, community groups, local organizations, and qualified professionals to explore safety-place concepts and coordinate preparedness planning. The design studio is one part of that goal: the application should also help communities understand needs, compare options, plan accessibility and essential services, document open questions, and prepare for professional and local-authority review.
+CommonGround Atlas is evolving from a subterranean shelter-design prototype into a broader tool for neighbors, community groups, local organizations, and qualified professionals to explore safety-place concepts and coordinate preparedness planning. The design studio is one part of that goal: the application should also help communities understand needs, compare options, plan accessibility and essential services, document open questions, and prepare for professional and local-authority review.
 
 ---
 
@@ -12,6 +12,10 @@ This is a prototype, not an emergency-management system or operational shelter d
 
 ### What the prototype offers
 
+- A community-readiness hub with discussion prompts and an exportable planning note for earthquakes, floods, volcanic events, severe weather, wildfire/heat/drought, epidemics and pandemics, service disruption, conflict and displacement, and other community scenarios.
+- Outbound links to selected international and U.S. public preparedness and hazard-information sources. They are not live integrations, endorsements, alerts, or official agency partnerships.
+- Clearly bounded tabletop-only prompts for speculative meteor-impact and fictional extraterrestrial scenarios; these are not predictions, threat assessments, or operational guidance.
+- An LLM Sanctuary concept workspace for discussing bounded assistant roles and continuity dependencies. It does not connect to or host a model.
 - A subterranean concept studio with schematic footprints, multiple levels, finish alternatives, stairs, elevator/lift options, selected building-system studies, and space-planning markers.
 - Preliminary cost and labor allowances intended to support early discussion, not to quote or commit to work.
 - A 2D plan editor, browser 3D preview, and WebXR view on compatible devices.
@@ -19,7 +23,7 @@ This is a prototype, not an emergency-management system or operational shelter d
 - An individual planning brief and file-based co-review workflow.
 - A rules-based Blueprint Genie persona prototype; it does not connect to an LLM.
 
-These capabilities do not yet make the application a community coordination, emergency-management, or shelter-operations platform. Needs assessment, shared community governance, emergency communications, staffed operations, supply tracking, verified shelter availability, shared VR sessions, and a connected AI collaborator are not implemented.
+These capabilities do not yet make the application a community coordination, emergency-management, or shelter-operations platform. Needs assessment, shared community governance, emergency communications, staffed operations, supply tracking, verified shelter availability, shared VR sessions, and a connected AI collaborator are not implemented. The new preparedness workspaces are planning aids, not an operational coordination system.
 
 ### Design, research, and safety boundaries
 

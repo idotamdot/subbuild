@@ -1,7 +1,7 @@
-# Global Safety Zones: Product and Delivery Plan
+# CommonGround Atlas: Product and Delivery Plan
 
 **Status:** Planning document; no implementation is authorized by this file alone.  
-**Product:** Global Safety Zones — Community Emergency Preparedness Coordination  
+**Product:** CommonGround Atlas — Global Community Readiness  
 **Last updated:** 2026-10-08
 
 ## Product vision
@@ -22,6 +22,8 @@ The product should feel open and useful, not like a gated compliance form. Let p
 
 ## Current product boundaries
 
+The interface now presents a CommonGround Atlas-branded readiness hub, a community discussion-plan download, links to selected international and U.S. public preparedness sources, and an LLM Sanctuary concept workspace. Scenario choices include public-health emergencies, conflict and displacement, meteor/space-weather topics, and fictional tabletop exercises. These are early planning aids and outbound source links—not agency integrations, live alerts, threat assessments, or operational coordination. A meteor shower is not presented as an impact warning; any meteor-impact or extraterrestrial-invasion scenario is explicitly speculative or fictional.
+
 This plan builds on an existing Next.js application and prototype. The project already contains a subterranean concept studio, stair and elevator options, conceptual building systems, preliminary estimates, a single-device VR preview, an individual planning brief, a browser-based research workspace, and safety and professional-review disclaimers. The current product is not yet a global hazard-mapping, safety-zone coordination, emergency-management, or shelter-operations platform.
 
 The following are **not yet complete, verified production capabilities**:
@@ -38,7 +40,7 @@ The following are **not yet complete, verified production capabilities**:
 - There are no Homeland Security, FEMA, NOAA/NWS, USGS, UN, WMO, GDACS, national civil-protection, or other official emergency-agency integrations or partnerships in the current application.
 - The Sanctuary project and LLM Sanctuary are product concepts only: there is no people-and-AI continuity planner, model workbench, model registry, agent orchestration, evaluation system, local inference hosting, or AI infrastructure planning.
 - A passing software test or build is not engineering approval, code compliance, worker-safety approval, or authorization to build.
-- Recent edits to the planner and co-review flow were in progress when this plan was requested and have not been verified. Reconcile those edits and run the release gate before treating them as complete.
+- The readiness and LLM Sanctuary workspaces are concept-level interface additions; production validation, user research, accessible field testing, and independent life-safety review remain outstanding.
 
 ## Product principles
 

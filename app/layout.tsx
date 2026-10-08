@@ -3,9 +3,9 @@ import { connection } from 'next/server'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Enter Sanctum SubTerranean Private Construction | Central Texas',
+  title: 'CommonGround Atlas | Global Community Readiness',
   description:
-    'Explore private shelter construction planning in Central Texas. Your preliminary plan stays on your device.',
+    'Explore an early-stage community preparedness prototype with all-hazards discussion prompts, official-source links, and a conceptual safety-place studio.',
   robots: { index: true, follow: true },
 }
 
