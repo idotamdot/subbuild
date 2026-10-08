@@ -341,7 +341,6 @@ type WebXRSessionProps = {
   stairs: StairKey
   lift: LiftKey
   systems: BuildingSystems
-  systems: BuildingSystems
   collaborator: CollaboratorKey
   voiceAllowed: boolean
   onClose: () => void
@@ -521,7 +520,9 @@ function screenSceneVertices(
     parseInt(hex.slice(3, 5), 16) / 255,
     parseInt(hex.slice(5, 7), 16) / 255,
   ]
-  const vertex = (point: Point3, color: Color3): void => vertices.push(...point, ...color)
+  const vertex = (point: Point3, color: Color3): void => {
+    vertices.push(...point, ...color)
+  }
   const triangle = (a: Point3, b: Point3, c: Point3, color: Color3): void => {
     vertex(a, color); vertex(b, color); vertex(c, color)
   }
@@ -632,13 +633,14 @@ function screenView(yaw: number, pitch: number): Float32Array {
   ])
 }
 
-function Screen3DPreview({ finishColor, shape, amenities, level, stairs, lift, lengthFeet, widthFeet }: {
+function Screen3DPreview({ finishColor, shape, amenities, level, stairs, lift, systems, lengthFeet, widthFeet }: {
   finishColor: string
   shape: FootprintKey
   amenities: PlacedAmenity[]
   level: number
   stairs: StairKey
   lift: LiftKey
+  systems: BuildingSystems
   lengthFeet: number
   widthFeet: number
 }): React.JSX.Element {
@@ -754,6 +756,7 @@ function FloorPlanEditor({
   level: number
   stairs: StairKey
   lift: LiftKey
+  systems: BuildingSystems
   lengthFeet: number
   widthFeet: number
   onPlace: (event: React.DragEvent<SVGSVGElement>) => void
@@ -819,6 +822,7 @@ function FloorPlanEditor({
         <text x="18" y="257" fill="#aeb9ad" fontFamily="monospace" fontSize="9">{Math.round(estimateFootprintArea(lengthFeet, widthFeet, shape)).toLocaleString()} SQ FT / LEVEL · CONCEPT ONLY</text>
       </svg>
       <p className="studio-floorplan-legend"><span>STAIR STUDY</span><span>{lift === 'none' ? 'NO LIFT SELECTED' : 'LIFT LOCATION STUDY'}</span><span>{levelAmenities.length} PLACED ITEM{levelAmenities.length === 1 ? '' : 'S'}</span></p>
+      <p className="studio-floorplan-systems"><span>POWER · {systems.power}</span><span>WATER · {systems.water}</span><span>AIR · {systems.air}</span><span>CONTROLS · {systems.controls}</span></p>
     </div>
   )
 }
@@ -1617,6 +1621,7 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
               level={selectedLevel}
               stairs={stairs}
               lift={lift}
+              systems={systems}
               lengthFeet={length}
               widthFeet={width}
               onPlace={dropAmenity}

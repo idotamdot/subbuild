@@ -85,6 +85,8 @@
 .studio-floorplan-marker:focus-visible{outline:none;filter:drop-shadow(0 0 4px #fff4d8)}
 .studio-floorplan-legend{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0 0}
 .studio-floorplan-legend span{padding:5px 7px;border:1px solid #38453a;color:#b9c4b4;font:8px var(--mono);letter-spacing:.03em}
+.studio-floorplan-systems{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 0;color:#b9c4b4;font:8px var(--mono);letter-spacing:.03em}
+.studio-floorplan-systems span{padding:5px 6px;border:1px solid #38453a;background:#111714}
 .studio-3d-tools{margin-top:16px;padding:14px;border:1px solid #37443c;background:linear-gradient(145deg,#151d19,#111715)}
 .studio-3d-tools .studio-panel-title{padding-top:0;border-top:0}
 .studio-3d-preview{position:relative;overflow:hidden;border:1px solid #35443a;background:#0e1513}
