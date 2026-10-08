@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/review-stale-claims",
+      "schedule": "17 6 * * *"
+    }
+  ]
+}

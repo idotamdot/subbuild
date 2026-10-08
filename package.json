@@ -1,0 +1,32 @@
+{
+  "name": "hearthline-private-planning",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "oxlint",
+    "test": "vitest run",
+    "migrate": "node scripts/migrate.mjs"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
+    "lucide-react": "^1.52.0",
+    "next": "^16.3.8",
+    "next-auth": "5.0.0-beta.32",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "oxlint": "^1.81.0",
+    "typescript": "~6.0.2",
+    "vitest": "^5.0.3"
+  }
+}
