@@ -10,9 +10,9 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
   return (
     <main className="inquiry-page">
       <section className="inquiry-card" role="alert">
-        <div className="eyebrow">ENTER SANCTUM SUBTERRANEAN PRIVATE CONSTRUCTION</div>
+        <div className="eyebrow">COMMONGROUND ATLAS / COMMUNITY READINESS PROTOTYPE</div>
         <h1>We couldn’t load this page.</h1>
-        <p className="step-hint">Your planning information is saved only in this browser. Try loading the page again.</p>
+        <p className="step-hint">Unsaved planning information may be lost. Try loading the page again.</p>
         <button className="button primary" onClick={reset}>Try again</button>
       </section>
     </main>

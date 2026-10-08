@@ -165,7 +165,6 @@ export default function CommunityPreparednessWorkspace() {
     const plan = {
       title: 'Community preparedness discussion plan',
       version: 1,
-      createdAt: new Date().toISOString(),
       community: communityName.trim() || 'Community not specified',
       region: region.trim() || 'Region not specified',
       scenario: {

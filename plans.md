@@ -1,8 +1,10 @@
 # CommonGround Atlas: Product and Delivery Plan
 
-**Status:** Planning document; no implementation is authorized by this file alone.  
+**Status:** Public prototype roadmap; planned work requires community review and contribution.  
 **Product:** CommonGround Atlas — Global Community Readiness  
 **Last updated:** 2026-10-08
+
+This roadmap is the shared implementation guide for contributors to the public prototype. Start with the highest-priority items in order, open focused pull requests, and update the release-validation placeholder with checks actually run. Planned work is not a claim that a feature is implemented or approved.
 
 ## Product vision
 
@@ -61,7 +63,7 @@ The following are **not yet complete, verified production capabilities**:
 
 ## Delivery phases
 
-### Phase 0 — Reconcile and establish a verified baseline
+### Phase 0 — Reconcile and establish a verified baseline (contribution priority)
 
 **Goal:** Know which prototype behavior is present and make the working tree buildable before extending it.
 
@@ -81,17 +83,17 @@ The following are **not yet complete, verified production capabilities**:
 - No type errors are waived with `any`.
 - Current navigation, plan selection, project brief, research area, co-review file, and export work or are explicitly marked incomplete.
 
-### Phase 1 — Open workspace navigation and planning flow
+### Phase 1 — Open workspace navigation and planning flow (contribution priority)
 
 **Goal:** Organize the experience into clear workspaces without making users scroll through one long page or losing their current choices.
 
 **Planned work**
 
-- Provide keyboard-accessible workspace tabs for Community Hub, Preparedness Cycle, Hazard & Safety Zones, Design Studio, Site Research, Solutions, Compare Concepts, LLM Sanctuary, Approach & Evidence, and Project Brief.
+- Provide keyboard-accessible workspace tabs for Community Readiness, Hazards & Sources, Safety-Place Studio, Approaches, Compare, LLM Sanctuary, Guidance, and the explicitly labeled legacy individual shelter inquiry.
 - Provide direct, keyboard-accessible tabs for the four planning stages: Your Goal, Project Context, Feasibility, and Review & Share.
 - Keep entered values in memory while switching tabs and stages. Make the reset behavior clear; persistent drafts can be considered separately.
 - Make workspace selection available from the hero, main navigation, solution cards, and prominent calls to action.
-- Support browser history/deep links where practical, so a user can open or share a specific workspace without confusing the selected tab.
+- Support browser history/deep links so a user can open or share a specific workspace without confusing the selected tab.
 - Add focus management, clear selected states, responsive wrapping/scrolling, and visible headings for assistive technology.
 - Put community purpose and available local-support information ahead of any individual sales or consultation workflow.
 
@@ -317,8 +319,8 @@ The following are **not yet complete, verified production capabilities**:
 
 ## Suggested implementation order
 
-1. Phase 0: reconcile the in-progress edits and establish a truthful test/build baseline.
-2. Phase 1: finish workspace and stage navigation so the core experience is easier to explore.
+1. Phase 0: reconcile edits and establish a truthful test/build baseline.
+2. Phase 1: complete workspace navigation, deep links, and accessibility.
 3. Phase 2: deliver community needs, shared priorities, follow-up ownership, and non-VR participation.
 4. Phase 3: define the canonical design model before adding more editor controls.
 5. Phase 4: complete and validate consistent plan/section/3D/VR behavior.

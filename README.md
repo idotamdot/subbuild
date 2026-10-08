@@ -21,7 +21,7 @@ This is a prototype, not an emergency-management system or operational shelter d
 - A 2D plan editor, browser 3D preview, and WebXR view on compatible devices.
 - A community-facing research workspace with Census TIGERweb county outlines and a human-maintained source register.
 - An individual planning brief and file-based co-review workflow.
-- A rules-based Blueprint Genie persona prototype; it does not connect to an LLM.
+- A rules-based persona prototype in the safety-place studio; it does not connect to an LLM.
 
 These capabilities do not yet make the application a community coordination, emergency-management, or shelter-operations platform. Needs assessment, shared community governance, emergency communications, staffed operations, supply tracking, verified shelter availability, shared VR sessions, and a connected AI collaborator are not implemented. The new preparedness workspaces are planning aids, not an operational coordination system.
 
@@ -55,6 +55,8 @@ These are product goals, not a claim that the current prototype performs these f
 
 ## Deferred work and placeholders
 
+This repository is public and welcomes focused community contributions. Use [plans.md](./plans.md) as the implementation roadmap: begin with Phases 0–2, keep new TypeScript strictly typed without `any`, preserve emergency and worker-safety boundaries, and report actual test/build results. Do not represent public-source links as agency integrations or planning concepts as operational emergency services.
+
 The detailed staged roadmap is in [plans.md](./plans.md). Unimplemented capabilities and their boundaries are also documented in [`docs/roadmap/`](./docs/roadmap/README.md). These files describe planning criteria only; they are not active integrations or commitments:
 
 * [Shared VR and spatial collaboration](./docs/roadmap/multi-user-vr.md)
@@ -64,6 +66,12 @@ The detailed staged roadmap is in [plans.md](./plans.md). Unimplemented capabili
 * [Verified professional/vendor network](./docs/roadmap/professional-network.md)
 
 Current application validation requirements and any known release blockers are tracked in the [release validation placeholder](./docs/roadmap/release-validation.md).
+
+### Suggested contribution sequence
+
+1. Reconcile in-progress design and co-review work and establish the current test, lint, type-check, and build baseline.
+2. Improve community needs, accessibility, source provenance, shared review, and follow-up-owner workflows.
+3. Add documented tests and update the relevant roadmap and release-validation notes in the same pull request.
 
 ---
 

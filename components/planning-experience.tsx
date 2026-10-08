@@ -14,7 +14,7 @@ import {
   Shield,
   UsersRound,
 } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { assessPhysicalEnvelope, buildPlanningBrief, feasibilityItems, getUnresolvedItems, type FeasibilityAnswer, type PlanningDraft } from '@/lib/planning'
 import PublishedContent from '@/components/published-content'
 import SubterraneanDesignStudio from '@/components/subterranean-design-studio'
@@ -78,52 +78,54 @@ const workspaces = [
   { id: 'comparison', label: 'Compare' },
   { id: 'sanctuary', label: 'LLM Sanctuary' },
   { id: 'approach', label: 'Guidance' },
-  { id: 'planner', label: 'Community brief' },
+  { id: 'planner', label: 'Shelter inquiry (legacy)' },
 ] as const
 type WorkspaceId = typeof workspaces[number]['id']
+const workspaceHashes: Record<WorkspaceId, string> = {
+  community: 'readiness',
+  research: 'hazards-and-sources',
+  design: 'design-studio',
+  solutions: 'approaches',
+  comparison: 'compare',
+  sanctuary: 'llm-sanctuary',
+  approach: 'guidance',
+  planner: 'shelter-inquiry',
+}
 
 function Blueprint() {
-  const [activeNode, setActiveNode] = useState('shell')
-  const descriptions: Record<string, string> = {
-    shell: 'Envelope concept • dimensions and assemblies require project-specific engineering',
-    air: 'Air-system concept • configuration and performance require qualified review',
-    exit: 'Egress concept • location and code requirements are site dependent',
-  }
   return (
-    <div className="blueprint" aria-label="Illustrative interactive shelter cross-section">
-      <span className="dimension top">CONCEPTUAL SECTION / NOT FOR CONSTRUCTION</span>
-      <span className="dimension side">SCHEMATIC ONLY</span>
-      <span className="plan-tag">HL / STUDY 001</span>
+    <div className="blueprint" aria-label="Illustrative community preparedness network">
+      <span className="dimension top">COMMUNITY CONNECTIONS / CONCEPT ONLY</span>
+      <span className="dimension side">NOT A LIVE MAP</span>
+      <span className="plan-tag">READINESS / 001</span>
       <svg className="plan-svg" viewBox="0 0 500 300" role="img" aria-labelledby="blueprint-title blueprint-desc">
-        <title id="blueprint-title">Illustrative shelter cutaway</title>
-        <desc id="blueprint-desc">A non-engineered vector schematic showing an underground room, surrounding layers, an air-system concept and an egress concept. Select the marked points for plain-language notes.</desc>
-        <g fill="none" stroke="#7394c5" strokeWidth="1">
-          <path d="M44 75h413M44 82h413M44 89h413" strokeDasharray="3 5" opacity=".6" />
-          <path d="M117 93v113h246V93M132 106v93h216v-93z" stroke="#8ba9d6" strokeWidth="2" />
-          <path d="M132 106h216v16H132zM132 183h216v16H132z" stroke="#d9a463" opacity=".9" />
-          <path d="M148 124h73v49h-73zM258 124h73v49h-73z" />
-          <path d="M145 139h-35v-19M334 137h42v-29h22" />
-          <path d="M237 199v28h36v-28M354 161h27v39h22v27" strokeDasharray="5 4" />
-          <path d="M93 205h300M102 215h282M112 225h262" opacity=".5" />
-          <path d="M117 89v117M363 89v117" strokeDasharray="2 4" opacity=".55" />
+        <title id="blueprint-title">Illustrative community readiness network</title>
+        <desc id="blueprint-desc">An abstract, non-geographic diagram connecting neighbors, local groups, trusted public sources, and community support. It contains no live hazard or location data.</desc>
+        <g fill="none" stroke="#83ae91" strokeWidth="1.5">
+          <path d="M250 142 135 82M250 142 365 82M250 142 112 205M250 142 388 205M250 142 250 240" />
+          <path d="M135 82 112 205M365 82 388 205M112 205 250 240M388 205 250 240" strokeDasharray="4 6" opacity=".55" />
+          <circle cx="250" cy="142" r="53" strokeDasharray="2 5" opacity=".65" />
+          <circle cx="250" cy="142" r="72" opacity=".3" />
         </g>
-        <g fill="#9fb9e5" fontFamily="DM Mono, monospace" fontSize="8">
-          <text x="153" y="151">PLANNED SPACE</text><text x="265" y="151">UTILITY ZONE</text>
-          <text x="111" y="245">SITE / DRAINAGE CONDITIONS VARY</text>
+        <g fill="#1c3024" stroke="#a4d0ad" strokeWidth="1.5">
+          <circle cx="250" cy="142" r="27" />
+          <circle cx="135" cy="82" r="17" />
+          <circle cx="365" cy="82" r="17" />
+          <circle cx="112" cy="205" r="17" />
+          <circle cx="388" cy="205" r="17" />
+          <circle cx="250" cy="240" r="17" />
         </g>
-        <g role="group" aria-label="Blueprint information points">
-          <g onClick={() => setActiveNode('shell')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveNode('shell') } }} tabIndex={0} role="button" aria-label="Envelope concept information">
-            <circle cx="132" cy="111" r="7" fill="#d97706" stroke="#f3cb91" /><circle cx="132" cy="111" r="12" fill="none" stroke="#d97706" opacity=".5" />
-          </g>
-          <g onClick={() => setActiveNode('air')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveNode('air') } }} tabIndex={0} role="button" aria-label="Air system concept information">
-            <circle cx="379" cy="108" r="7" fill="#4f83e5" stroke="#acc7ff" /><circle cx="379" cy="108" r="12" fill="none" stroke="#4f83e5" opacity=".5" />
-          </g>
-          <g onClick={() => setActiveNode('exit')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveNode('exit') } }} tabIndex={0} role="button" aria-label="Egress concept information">
-            <circle cx="392" cy="226" r="7" fill="#4f83e5" stroke="#acc7ff" /><circle cx="392" cy="226" r="12" fill="none" stroke="#4f83e5" opacity=".5" />
-          </g>
+        <g fill="#d1e6d3" fontFamily="DM Mono, monospace" fontSize="8" textAnchor="middle">
+          <text x="250" y="145">COMMUNITY</text>
+          <text x="135" y="85">PEOPLE</text>
+          <text x="365" y="85">SOURCES</text>
+          <text x="112" y="208">LOCAL GROUPS</text>
+          <text x="388" y="208">SUPPORT</text>
+          <text x="250" y="243">PREPARE</text>
+          <text x="250" y="281" fill="#9eae9f">ILLUSTRATIVE NETWORK / NO LIVE DATA</text>
         </g>
       </svg>
-      <span className="plan-caption" aria-live="polite">{descriptions[activeNode]}</span>
+      <span className="plan-caption">Human-led planning / locally governed decisions</span>
     </div>
   )
 }
@@ -153,6 +155,17 @@ export default function PlanningExperience() {
   const workspaceTabRefs = useRef<Array<HTMLButtonElement | null>>([])
   const stageTabRefs = useRef<Array<HTMLButtonElement | null>>([])
 
+  useEffect(() => {
+    const syncWorkspaceWithHash = () => {
+      const hash = window.location.hash.slice(1)
+      const match = workspaces.find((workspace) => workspaceHashes[workspace.id] === hash)
+      if (match) setActiveWorkspace(match.id)
+    }
+    syncWorkspaceWithHash()
+    window.addEventListener('hashchange', syncWorkspaceWithHash)
+    return () => window.removeEventListener('hashchange', syncWorkspaceWithHash)
+  }, [])
+
   const unresolved = getUnresolvedItems(plan)
   const physicalEnvelope = assessPhysicalEnvelope(plan)
   const displayedRows = filter === 'All goals' ? criteria : criteria.filter((row) =>
@@ -164,6 +177,7 @@ export default function PlanningExperience() {
   const updateContact = <K extends keyof Contact>(key: K, value: Contact[K]) => setContact((current) => ({ ...current, [key]: value }))
   const selectWorkspace = (workspace: WorkspaceId) => {
     setActiveWorkspace(workspace)
+    window.history.replaceState(null, '', `#${workspaceHashes[workspace]}`)
     document.getElementById('workspace-tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
   const handleWorkspaceKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
@@ -251,17 +265,13 @@ export default function PlanningExperience() {
       setSubmissionError(error instanceof Error ? error.message : 'Receipt confirmation is unavailable.')
     }
   }
-  const scrollToPlanner = () => {
-    setStep(0)
-    selectWorkspace('planner')
-  }
   const plannerContent = (
     <section className="planner-section" id="planner" aria-labelledby="planner-title">
       <div className="shell section planner-layout">
         <aside className="planner-aside">
-          <span className="eyebrow">COMMUNITY BRIEF / START WHERE YOU ARE</span>
-          <h2 id="planner-title">Every life matters. Prepare so no one is left out.</h2>
-          <p>Bring community needs, concerns, and unanswered questions into one starting brief. This does not assess a hazard or determine if a location is safe.</p>
+          <span className="eyebrow">LEGACY WORKFLOW / INDIVIDUAL SHELTER INQUIRY</span>
+          <h2 id="planner-title">Explore an individual shelter concept.</h2>
+          <p>This earlier private-construction inquiry is separate from CommonGround Atlas community readiness. It does not assess a hazard or determine if a location is safe.</p>
           <div className="privacy-points">
             <div className="privacy-point"><FileText size={17} /> Your draft stays in this open page and clears when you close or reload it.</div>
             <div className="privacy-point"><Shield size={17} /> Downloads are readable JSON files; include only details you want to share.</div>
@@ -274,7 +284,7 @@ export default function PlanningExperience() {
           {reference ? (
             <div>
               <div className="eyebrow">REQUEST RECEIVED</div>
-              <h3 style={{ marginTop: 12 }}>Thank you. Your community planning request has been received.</h3>
+              <h3 style={{ marginTop: 12 }}>Your individual shelter inquiry has been received.</h3>
               <div className="reference" aria-label={`Inquiry reference ${reference}`}>{reference}</div>
               <p className="step-hint">This is an on-page-only acknowledgment. No email or text was sent. A response is expected within two business days. Please avoid sharing exact property locations or other sensitive details during initial contact.</p>
               <div className="summary"><dl><div><dt>Preferred contact</dt><dd>{contact.channel}</dd></div><div><dt>Contact window</dt><dd>{contact.window}</dd></div><div><dt>Inquiry reference</dt><dd>{reference}</dd></div><div><dt>Expected response</dt><dd>Within two business days</dd></div></dl></div>
@@ -332,7 +342,7 @@ export default function PlanningExperience() {
               </div>
               <div role="tabpanel" id="planning-stage-panel-3" aria-labelledby="planning-stage-tab-3" tabIndex={0} hidden={step !== 3}>
               {step === 3 && <>
-                <h3>Review your brief and decide what to share.</h3><p className="step-hint">The downloaded or co-review brief is readable JSON. If you request a consultation, the carpenter receives only the details you have chosen to include and the contact details you provide below.</p>
+                <h3>Review your individual shelter brief.</h3><p className="step-hint">The downloaded or co-review brief is readable JSON. If you request a consultation, the private construction business named below receives the details you choose to include and the contact details you provide.</p>
                 <div className="summary"><dl><div><dt>Goal</dt><dd>{plan.goal || 'Not selected'}</dd></div><div><dt>Project type</dt><dd>{plan.projectType || 'Not sure yet'}</dd></div><div><dt>Occupancy</dt><dd>{plan.occupancy || 'Not specified'}</dd></div><div><dt>Duration</dt><dd>{plan.duration || 'Not specified'}</dd></div><div><dt>Area</dt><dd>{plan.area || 'Not specified'}</dd></div></dl><div style={{ marginTop: 14, fontSize: 11, color: '#bbc5d1' }}>Unresolved or unreviewed: {unresolved.length ? unresolved.map(([key]) => key).join(', ') : 'No items marked yet'}</div></div>
                 <div className="summary"><dt>Your priorities</dt><dd>{plan.ownerPriorities.length ? plan.ownerPriorities.join(' · ') : 'Not selected'}</dd></div>
                 <div className="filter-label" style={{ marginTop: 16 }}>Choose what to leave out of your shared brief</div>
@@ -368,16 +378,16 @@ export default function PlanningExperience() {
   return (
     <main>
       <header className="site-header shell">
-        <a className="brand" href="#" aria-label="CommonGround Atlas home"><span className="brand-mark"><Shield size={18} /></span><span className="brand-copy"><span className="brand-name">COMMONGROUND ATLAS</span><span className="brand-suffix">GLOBAL COMMUNITY READINESS</span></span></a>
-        <nav className="nav" aria-label="Main navigation"><button type="button" onClick={() => selectWorkspace('community')}>Readiness</button><button type="button" onClick={() => selectWorkspace('research')}>Hazards & sources</button><button type="button" onClick={() => selectWorkspace('design')}>Safety-place studio</button><button type="button" onClick={() => selectWorkspace('sanctuary')}>LLM Sanctuary</button><button className="nav-cta" type="button" onClick={scrollToPlanner}>Community brief <ArrowRight size={14} /></button></nav>
+        <a className="brand" href="#" aria-label="CommonGround Atlas home"><span className="brand-mark"><Shield size={18} /></span><span className="brand-copy"><span className="brand-name">COMMONGROUND ATLAS</span><span className="brand-suffix">COMMUNITY READINESS PROTOTYPE</span></span></a>
+        <nav className="nav" aria-label="Main navigation"><button type="button" onClick={() => selectWorkspace('community')}>Readiness</button><button type="button" onClick={() => selectWorkspace('research')}>Hazards & sources</button><button type="button" onClick={() => selectWorkspace('design')}>Safety-place studio</button><button type="button" onClick={() => selectWorkspace('sanctuary')}>LLM Sanctuary</button><button className="nav-cta" type="button" onClick={() => selectWorkspace('community')}>Community checklist <ArrowRight size={14} /></button></nav>
       </header>
       <div className="shell">
         <section className="hero" aria-labelledby="hero-title">
           <div>
-            <div className="eyebrow">A GLOBAL COMMUNITY READINESS ATLAS</div>
+            <div className="eyebrow">A COMMUNITY READINESS PROTOTYPE / BUILT IN PUBLIC</div>
             <h1 id="hero-title">A world that <em>prepares together.</em></h1>
-            <p className="hero-copy">A shared starting point for communities to understand risk, include everyone in preparedness, and coordinate trusted next steps across borders. From earthquakes and floods to disease outbreaks, volcanic hazards, meteors, conflict, and unknown events.</p>
-            <div className="hero-actions"><button className="button primary" onClick={() => selectWorkspace('community')}>Explore community readiness <ArrowRight size={16} /></button><button className="button" onClick={() => selectWorkspace('sanctuary')}>Build an LLM Sanctuary concept <ArrowDown size={15} /></button></div>
+            <p className="hero-copy">An open starting point for communities to explore preparedness, share inclusive discussion prompts, and connect trusted public resources. The interface is a prototype—not a live map, alert feed, or emergency coordination service.</p>
+            <div className="hero-actions"><button className="button primary" onClick={() => selectWorkspace('community')}>Explore community readiness <ArrowRight size={16} /></button><button className="button" onClick={() => selectWorkspace('sanctuary')}>Explore the Sanctuary concept <ArrowDown size={15} /></button></div>
             <div className="hero-note"><FileText size={13} /> The ambition is to help protect every life. This prototype cannot promise that everybody can be saved.</div>
           </div>
           <Blueprint />
@@ -409,7 +419,7 @@ export default function PlanningExperience() {
       <div id="workspace-panel-research" className="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-research" tabIndex={0} hidden={activeWorkspace !== 'research'}><ComplianceResearchWorkspace /></div>
       <div id="workspace-panel-solutions" className="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-solutions" tabIndex={0} hidden={activeWorkspace !== 'solutions'}>
         <section className="section shell" aria-labelledby="solutions-title">
-          <div className="section-heading"><div><span className="eyebrow">SHELTER & CARPENTRY</span><h2 id="solutions-title">Begin with the right questions.</h2></div><p>Every property is different. Start with plain-language options, then explore the factors that deserve a closer look.</p></div>
+          <div className="section-heading"><div><span className="eyebrow">COMMUNITY SAFETY-PLACE CONCEPTS</span><h2 id="solutions-title">Explore options—not just buildings.</h2></div><p>Discuss existing facilities, accessible gathering spaces, shelter concepts, and distributed support. These prompts do not identify a safe site or recommend construction.</p></div>
           <div className="solution-grid">{solutions.map((solution) => <button className="solution-card" type="button" key={solution.id} onClick={() => { setPlan((current) => ({ ...current, goal: solution.id === 'storm' ? 'Storm shelter' : solution.id === 'room' ? 'Safe room' : 'Custom shelter' })); selectWorkspace('comparison') }}><span className="card-number">{solution.number}</span><h3>{solution.title}</h3><p>{solution.copy}</p><span className="card-link">Explore planning guidance <ChevronRight size={16} /></span></button>)}</div>
         </section>
       </div>
@@ -428,7 +438,7 @@ export default function PlanningExperience() {
           <div className="solution-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
             {[['01 / ENVELOPE', 'Structure & enclosure', 'Materials, connections, soil conditions, and loads require project-specific design and review.'], ['02 / AIR & UTILITIES', 'Air and utility concepts', 'Filtration, ventilation, backup power, and service life depend on the intended use and designed system.'], ['03 / ACCESS & DRAINAGE', 'Egress and water management', 'Access, drainage, groundwater, and local code requirements need qualified site assessment.']].map(([tag, title, copy]) => <article className="solution-card" key={tag}><span className="card-number">{tag}</span><h3>{title}</h3><p>{copy}</p><span className="card-link"><span className="status-pill">CONCEPT ONLY / SITE-DEPENDENT</span></span></article>)}
           </div>
-          <div className="hero-actions"><button className="button small" type="button" onClick={scrollToPlanner}>Explore your planning brief <ArrowRight size={14} /></button><span className="hero-note"><CheckCircle2 size={13} /> Final design and technical claims require qualified review.</span></div>
+          <div className="hero-actions"><button className="button small" type="button" onClick={() => selectWorkspace('community')}>Explore community planning <ArrowRight size={14} /></button><span className="hero-note"><CheckCircle2 size={13} /> Final design and technical claims require qualified review.</span></div>
         </section>
         <PublishedContent />
       </div>

@@ -53,7 +53,6 @@ export default function LlmSanctuaryWorkspace() {
     const concept = {
       title: 'Community LLM Sanctuary planning concept',
       version: 1,
-      createdAt: new Date().toISOString(),
       communityPurpose: communityPurpose.trim() || 'Purpose not specified',
       deploymentMode: {
         id: selectedDeployment.id,
