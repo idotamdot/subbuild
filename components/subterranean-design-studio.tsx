@@ -17,7 +17,7 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { estimateConcept, type BuildingSystems, type FinishKey, type FootprintKey, type LiftKey, type StairKey } from '@/lib/design-estimates'
+import { estimateConcept, estimateFootprintArea, type BuildingSystems, type FinishKey, type FootprintKey, type LiftKey, type StairKey } from '@/lib/design-estimates'
 
 const finishes: Array<{
   key: FinishKey
@@ -140,7 +140,10 @@ function downloadFile(name: string, content: string, type: string): void {
 
 function footprintPath(x: number, y: number, width: number, height: number, shape: FootprintKey): string {
   if (shape === 'circular') {
-    return `M${x + width / 2} ${y}a${width / 2} ${height / 2} 0 1 1 0 ${height}a${width / 2} ${height / 2} 0 1 1 0 -${height}Z`
+    const diameter = Math.min(width, height)
+    const circleX = x + (width - diameter) / 2
+    const circleY = y + (height - diameter) / 2
+    return `M${circleX + diameter / 2} ${circleY}a${diameter / 2} ${diameter / 2} 0 1 1 0 ${diameter}a${diameter / 2} ${diameter / 2} 0 1 1 0 -${diameter}Z`
   }
   const points = shape === 'l-shaped'
     ? [[0, 0], [1, 0], [1, 0.55], [0.58, 0.55], [0.58, 1], [0, 1]]
@@ -325,10 +328,14 @@ type XrCanvasContext = WebGLRenderingContext & { makeXRCompatible(): Promise<voi
 type XrLayerConstructor = new (session: XrSession, context: WebGLRenderingContext) => XrLayer
 type WebXRSessionProps = {
   finish: (typeof finishes)[number]
+  footprint: FootprintKey
   lengthFeet: number
   widthFeet: number
   rooms: string[]
+  amenities: PlacedAmenity[]
   selectedLevel: number
+  stairs: StairKey
+  lift: LiftKey
   collaborator: CollaboratorKey
   voiceAllowed: boolean
   onClose: () => void
@@ -398,6 +405,10 @@ function roomVertices({
   selectedRoom,
   lengthFeet,
   widthFeet,
+  footprint,
+  amenities,
+  stairs,
+  lift,
 }: {
   color: Color3
   activeFinish: FinishKey
@@ -407,6 +418,10 @@ function roomVertices({
   selectedRoom: string
   lengthFeet: number
   widthFeet: number
+  footprint: FootprintKey
+  amenities: PlacedAmenity[]
+  stairs: StairKey
+  lift: LiftKey
 }): Float32Array {
   const vertices: number[] = []
   const quad = (points: Point3[], tint: number, baseColor: Color3 = color): void => {
@@ -414,7 +429,6 @@ function roomVertices({
     for (const index of [0, 1, 2, 0, 2, 3]) vertices.push(...points[index], ...shaded)
   }
   const wall: Color3 = [0.24, 0.31, 0.34]
-  const roomHalfWidth = Math.min(5.6, Math.max(3.4, Math.max(widthFeet, lengthFeet) / 4))
   quad([[-4, 0, -5], [-4, 3.2, -5], [4, 3.2, -5], [4, 0, -5]], 0.74)
   quad([[-4, 0, 5], [-4, 3.2, 5], [4, 3.2, 5], [4, 0, 5]], 0.68)
   quad([[-4, 0, -5], [-4, 3.2, -5], [-4, 3.2, 5], [-4, 0, 5]], wall[0])
@@ -455,13 +469,17 @@ function roomVertices({
   quad([[-2.52, 0.68, -4.84], [-2.52, 0.94, -4.84], [-2.28, 0.94, -4.84], [-2.28, 0.68, -4.84]], 1, addAction)
   quad([[-0.12, 0.68, -4.84], [-0.12, 0.94, -4.84], [0.12, 0.94, -4.84], [0.12, 0.68, -4.84]], 1, collaboratorColor)
   quad([[2.28, 0.68, -4.84], [2.28, 0.94, -4.84], [2.52, 0.94, -4.84], [2.52, 0.68, -4.84]], 1, [0.78, 0.67, 0.42])
-  quad([[-roomHalfWidth, 0.07, -roomHalfWidth], [-roomHalfWidth, 0.07, roomHalfWidth], [roomHalfWidth, 0.07, roomHalfWidth], [roomHalfWidth, 0.07, -roomHalfWidth]], 0.82)
   appendEllipsoid(vertices, [2.45, 1.45, -1.15], [0.3, 0.38, 0.25], collaboratorColor)
   appendEllipsoid(vertices, [2.45, 2.02, -1.15], [0.23, 0.24, 0.21], collaboratorColor)
   const orbitColor: Color3 = [0.93, 0.84, 0.59]
   appendEllipsoid(vertices, [2.12, 1.99, -1.15], [0.045, 0.045, 0.045], orbitColor, 8, 6)
   appendEllipsoid(vertices, [2.76, 1.68, -1.15], [0.035, 0.035, 0.035], orbitColor, 8, 6)
-  return new Float32Array(vertices)
+  const footprintHex = `#${color.map((channel) => Math.round(channel * 255).toString(16).padStart(2, '0')).join('')}`
+  const concept = screenSceneVertices(footprint, footprintHex, amenities, selectedLevel, stairs, lift, lengthFeet, widthFeet)
+  const scene = new Float32Array(vertices.length + concept.length)
+  scene.set(vertices)
+  scene.set(concept, vertices.length)
+  return scene
 }
 
 function createShader(gl: WebGLRenderingContext, type: number, source: string): WebGLShader {
@@ -477,7 +495,16 @@ function createShader(gl: WebGLRenderingContext, type: number, source: string): 
   return shader
 }
 
-function screenSceneVertices(shape: FootprintKey, finishColor: string, amenities: PlacedAmenity[], level: number, stairs: StairKey, lift: LiftKey): Float32Array {
+function screenSceneVertices(
+  shape: FootprintKey,
+  finishColor: string,
+  amenities: PlacedAmenity[],
+  level: number,
+  stairs: StairKey,
+  lift: LiftKey,
+  lengthFeet: number,
+  widthFeet: number,
+): Float32Array {
   const vertices: number[] = []
   const colorFromHex = (hex: string): Color3 => [
     parseInt(hex.slice(1, 3), 16) / 255,
@@ -491,6 +518,9 @@ function screenSceneVertices(shape: FootprintKey, finishColor: string, amenities
   const quad = (a: Point3, b: Point3, c: Point3, d: Point3, color: Color3): void => {
     triangle(a, b, c, color); triangle(a, c, d, color)
   }
+  const footprintScale = shape === 'circular' ? Math.min(lengthFeet, widthFeet) / 32 : undefined
+  const lengthScale = footprintScale ?? lengthFeet / 32
+  const widthScale = footprintScale ?? widthFeet / 32
   const outline: Array<[number, number]> = shape === 'l-shaped'
     ? [[-4, -4], [4, -4], [4, 0], [0, 0], [0, 4], [-4, 4]]
     : shape === 'octagonal'
@@ -504,15 +534,23 @@ function screenSceneVertices(shape: FootprintKey, finishColor: string, amenities
   const wallColor: Color3 = colorFromHex(finishColor).map((channel) => channel * 0.55) as [number, number, number]
   const floorColor: Color3 = [0.31, 0.37, 0.32]
   for (let index = 0; index < outline.length; index += 1) {
-    const [x1, z1] = outline[index]
-    const [x2, z2] = outline[(index + 1) % outline.length]
+    const [rawX1, rawZ1] = outline[index]
+    const [rawX2, rawZ2] = outline[(index + 1) % outline.length]
+    const x1 = rawX1 * lengthScale
+    const z1 = rawZ1 * widthScale
+    const x2 = rawX2 * lengthScale
+    const z2 = rawZ2 * widthScale
     quad([x1, 0, z1], [x1, 3.2, z1], [x2, 3.2, z2], [x2, 0, z2], wallColor)
     if (index > 0) triangle([0, 0.06, 0], [x1, 0.06, z1], [x2, 0.06, z2], floorColor)
   }
   const addBox = (cx: number, cy: number, cz: number, sx: number, sy: number, sz: number, color: Color3): void => {
-    const x0 = cx - sx / 2, x1 = cx + sx / 2
+    const scaledCx = cx * lengthScale
+    const scaledCz = cz * widthScale
+    const scaledSx = sx * lengthScale
+    const scaledSz = sz * widthScale
+    const x0 = scaledCx - scaledSx / 2, x1 = scaledCx + scaledSx / 2
     const y0 = cy, y1 = cy + sy
-    const z0 = cz - sz / 2, z1 = cz + sz / 2
+    const z0 = scaledCz - scaledSz / 2, z1 = scaledCz + scaledSz / 2
     quad([x0, y0, z0], [x0, y1, z0], [x1, y1, z0], [x1, y0, z0], color)
     quad([x1, y0, z1], [x1, y1, z1], [x0, y1, z1], [x0, y0, z1], color)
     quad([x0, y0, z1], [x0, y1, z1], [x0, y1, z0], [x0, y0, z0], color)
@@ -569,13 +607,15 @@ function screenView(yaw: number, pitch: number): Float32Array {
   ])
 }
 
-function Screen3DPreview({ finishColor, shape, amenities, level, stairs, lift }: {
+function Screen3DPreview({ finishColor, shape, amenities, level, stairs, lift, lengthFeet, widthFeet }: {
   finishColor: string
   shape: FootprintKey
   amenities: PlacedAmenity[]
   level: number
   stairs: StairKey
   lift: LiftKey
+  lengthFeet: number
+  widthFeet: number
 }): React.JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const drawRef = useRef<() => void>(() => {})
@@ -613,7 +653,7 @@ function Screen3DPreview({ finishColor, shape, amenities, level, stairs, lift }:
       gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 24, 12)
       gl.enable(gl.DEPTH_TEST)
       gl.disable(gl.CULL_FACE)
-      const vertices = screenSceneVertices(shape, finishColor, amenities, level, stairs, lift)
+      const vertices = screenSceneVertices(shape, finishColor, amenities, level, stairs, lift, lengthFeet, widthFeet)
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
       gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
       drawRef.current = () => {
@@ -645,7 +685,7 @@ function Screen3DPreview({ finishColor, shape, amenities, level, stairs, lift }:
       if (vertexShader) gl.deleteShader(vertexShader)
       if (fragmentShader) gl.deleteShader(fragmentShader)
     }
-  }, [finishColor, shape, amenities, level, stairs, lift])
+  }, [finishColor, shape, amenities, level, stairs, lift, lengthFeet, widthFeet])
 
   return (
     <div className="studio-3d-preview">
@@ -670,16 +710,107 @@ function Screen3DPreview({ finishColor, shape, amenities, level, stairs, lift }:
   )
 }
 
+function FloorPlanEditor({
+  shape,
+  finishColor,
+  amenities,
+  level,
+  stairs,
+  lift,
+  lengthFeet,
+  widthFeet,
+  onPlace,
+  onRemove,
+}: {
+  shape: FootprintKey
+  finishColor: string
+  amenities: PlacedAmenity[]
+  level: number
+  stairs: StairKey
+  lift: LiftKey
+  lengthFeet: number
+  widthFeet: number
+  onPlace: (event: React.DragEvent<SVGSVGElement>) => void
+  onRemove: (id: string) => void
+}): React.JSX.Element {
+  const stairPath = stairs === 'straight'
+    ? 'M92 197h16v-18h16v-18h16v-18h16'
+    : stairs === 'sculptural-spiral'
+      ? 'M98 195c28-3 30-31 11-35s-26 16-10 27 31 1 24-22'
+      : 'M92 196h18v-16h18v16h18v-16h17'
+  const levelAmenities = amenities.filter((item) => item.level === level)
+
+  return (
+    <div className="studio-floorplan-wrap">
+      <div className="studio-panel-title"><span>DRAG ITEMS INTO THE FLOOR PLAN</span><Compass size={15} /></div>
+      <p className="studio-footnote">Top-down illustration of Level {level + 1}. Drag a palette item into the outlined footprint to place it; select a placed marker to remove it. Stairs, lifts, room sizes, clearances, and egress shown here are not code or equipment specifications.</p>
+      <svg
+        className="studio-floorplan"
+        viewBox="0 0 480 270"
+        role="group"
+        aria-label={`Interactive top-down concept floor plan, Level ${level + 1}, ${shape} footprint`}
+        onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = 'copy' }}
+        onDrop={onPlace}
+      >
+        <defs>
+          <pattern id="floorplan-grid" width="12" height="12" patternUnits="userSpaceOnUse">
+            <path d="M12 0H0V12" fill="none" stroke="#82917b" strokeOpacity=".12" strokeWidth=".6" />
+          </pattern>
+        </defs>
+        <rect x="0" y="0" width="480" height="270" fill="url(#floorplan-grid)" />
+        <path d={footprintPath(40, 32, 400, 200, shape)} fill="#26342e" stroke={finishColor} strokeWidth="4" />
+        <path d={stairPath} fill="none" stroke="#ddc38c" strokeWidth="3" strokeDasharray="5 3" />
+        {lift !== 'none' && <g aria-label={`${liftOptions.find((item) => item.key === lift)?.label ?? 'Lift'} location concept`}>
+          <rect x="350" y="54" width="48" height="48" rx="3" fill="#344b46" stroke="#9fc0bd" strokeWidth="2" />
+          <path d="M374 59v38M355 78h38" stroke="#c0d7ca" strokeOpacity=".55" />
+          <text x="374" y="115" textAnchor="middle" fill="#c0d7ca" fontFamily="monospace" fontSize="8">LIFT STUDY</text>
+        </g>}
+        {levelAmenities.map((item) => {
+          const amenity = amenityOptions.find((option) => option.key === item.kind)
+          if (!amenity) return null
+          const x = 40 + item.x * 400
+          const y = 32 + item.y * 200
+          return (
+            <g
+              key={item.id}
+              className="studio-floorplan-marker"
+              role="button"
+              tabIndex={0}
+              aria-label={`Remove ${amenity.label} from Level ${level + 1}`}
+              onClick={() => onRemove(item.id)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  onRemove(item.id)
+                }
+              }}
+            >
+              <rect x={x - 8} y={y - 8} width="16" height="16" rx="3" fill={amenity.color} stroke="#f5edd9" strokeWidth="1.5" />
+              <title>{amenity.label} — select to remove</title>
+            </g>
+          )
+        })}
+        <text x="18" y="257" fill="#aeb9ad" fontFamily="monospace" fontSize="9">{Math.round(estimateFootprintArea(lengthFeet, widthFeet, shape)).toLocaleString()} SQ FT / LEVEL · CONCEPT ONLY</text>
+      </svg>
+      <p className="studio-floorplan-legend"><span>STAIR STUDY</span><span>{lift === 'none' ? 'NO LIFT SELECTED' : 'LIFT LOCATION STUDY'}</span><span>{levelAmenities.length} PLACED ITEM{levelAmenities.length === 1 ? '' : 'S'}</span></p>
+    </div>
+  )
+}
+
 function WebXRButton({ onEnter }: { onEnter: () => void }): React.JSX.Element {
   return <button className="button studio-vr-button" type="button" onClick={onEnter}><Compass size={16} /> Enter headset VR</button>
 }
 
 function WebXRSession({
   finish,
+  footprint,
   lengthFeet,
   widthFeet,
   rooms,
+  amenities,
   selectedLevel,
+  stairs,
+  lift,
   collaborator,
   voiceAllowed,
   onClose,
@@ -747,11 +878,15 @@ function WebXRSession({
       selectedRoom: rooms[selectedLevel] ?? rooms[0] ?? 'Open living',
       lengthFeet,
       widthFeet,
+      footprint,
+      amenities,
+      stairs,
+      lift,
     })
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
     vertexCountRef.current = vertices.length / 6
-  }, [finish, lengthFeet, widthFeet, rooms, selectedLevel, collaborator])
+  }, [finish, lengthFeet, widthFeet, rooms, selectedLevel, collaborator, footprint, amenities, stairs, lift])
 
   const enterVr = async () => {
     setError('')
@@ -811,6 +946,10 @@ function WebXRSession({
         selectedRoom: rooms[selectedLevel] ?? rooms[0] ?? 'Open living',
         lengthFeet,
         widthFeet,
+        footprint,
+        amenities,
+        stairs,
+        lift,
       })
       const buffer = gl.createBuffer()
       if (!buffer) throw new Error('Your browser could not allocate the VR room geometry.')
@@ -842,7 +981,7 @@ function WebXRSession({
             z,
           ]
         }
-        const materialPoint = intersectPlane(-4.85)
+        const materialPoint = intersectPlane(-3.8)
         if (materialPoint && materialPoint[1] >= 2.15 && materialPoint[1] <= 2.95) {
           const swatchX: number[] = [-2.4, -0.8, 0.8, 2.4]
           const materialIndex = swatchX.findIndex((center) => Math.abs(materialPoint[0] - center) < 0.43)
@@ -1059,7 +1198,12 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
   }
   const isInsideFootprint = (x: number, y: number): boolean => {
     if (footprint === 'l-shaped') return x <= 0.58 || y <= 0.55
-    if (footprint === 'circular') return (x - 0.5) ** 2 + (y - 0.5) ** 2 <= 0.22
+    if (footprint === 'circular') {
+      const pointX = (x - 0.5) * length
+      const pointY = (y - 0.5) * width
+      const radius = Math.min(length, width) / 2
+      return pointX ** 2 + pointY ** 2 <= radius ** 2
+    }
     if (footprint === 'octagonal') return Math.abs(x - 0.5) + Math.abs(y - 0.5) <= 0.92
     return true
   }
@@ -1079,14 +1223,21 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
   const dropAmenity = (event: React.DragEvent<SVGSVGElement>): void => {
     event.preventDefault()
     const key = event.dataTransfer.getData('text/plain')
-    if (!amenityOptions.some((item) => item.key === key)) {
+    const amenity = amenityOptions.find((item) => item.key === key)
+    if (!amenity) {
       setAmenityStatus('Choose an amenity from the palette before dropping it.')
       return
     }
-    const bounds = event.currentTarget.getBoundingClientRect()
-    const x = (event.clientX - bounds.left) / bounds.width * 640
-    const y = (event.clientY - bounds.top) / bounds.height * 420
-    placeAmenity(key as AmenityKey, (x - 100) / 440, (y - 60) / 300)
+    const transform = event.currentTarget.getScreenCTM()
+    if (!transform) {
+      setAmenityStatus('The floor plan is not ready for item placement. Try again.')
+      return
+    }
+    const point = event.currentTarget.createSVGPoint()
+    point.x = event.clientX
+    point.y = event.clientY
+    const svgPoint = point.matrixTransform(transform.inverse())
+    placeAmenity(amenity.key, (svgPoint.x - 40) / 400, (svgPoint.y - 32) / 200)
   }
   const askGenie = (rawPrompt: string): void => {
     const prompt = rawPrompt.trim()
@@ -1305,7 +1456,7 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
             <div className="studio-access-group" role="group" aria-label="Choose a conceptual floor plan">
               {footprintOptions.map((option) => (
                 <button key={option.key} className={`studio-access-option ${footprint === option.key ? 'active' : ''}`} type="button" onClick={() => setFootprint(option.key)} aria-pressed={footprint === option.key}>
-                  <strong>{option.label}</strong><span>Approx. {Math.round(footprint === option.key ? ({ rectangular: 1, 'l-shaped': 0.78, octagonal: 0.9, circular: Math.PI / 4 } satisfies Record<FootprintKey, number>)[option.key] * length * width : 0).toLocaleString()} sq ft / level · schematic</span>
+                  <strong>{option.label}</strong><span>Approx. {Math.round(estimateFootprintArea(length, width, option.key)).toLocaleString()} sq ft / level · schematic</span>
                 </button>
               ))}
             </div>
@@ -1408,9 +1559,7 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
                         const amenity = amenityOptions.find((candidate) => candidate.key === item.kind)!
                         const boxX = x + roomWidth * item.x - 5
                         const boxY = y + 17 + item.y * 18
-                        return <g key={item.id} role="button" tabIndex={0} aria-label={`Remove ${amenity.label} from level ${index + 1}`} onClick={() => setPlacedAmenities((current) => current.filter((entry) => entry.id !== item.id))} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') setPlacedAmenities((current) => current.filter((entry) => entry.id !== item.id)) }} style={{ cursor: 'pointer' }}>
-                          <rect x={boxX} y={boxY} width="11" height="11" rx="2" fill={amenity.color} stroke="#f5edd9" strokeWidth="1.5" />
-                        </g>
+                        return <rect key={item.id} x={boxX} y={boxY} width="11" height="11" rx="2" fill={amenity.color} stroke="#f5edd9" strokeWidth="1.5"><title>{amenity.label} on Level {index + 1}</title></rect>
                       })}
                     </g>
                   )
@@ -1419,6 +1568,18 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
               </svg>
               <span className="studio-model-tag">SECTION A–A / STUDY {String(rooms.length).padStart(2, '0')}</span>
             </div>
+            <FloorPlanEditor
+              shape={footprint}
+              finishColor={finishData.color}
+              amenities={placedAmenities}
+              level={selectedLevel}
+              stairs={stairs}
+              lift={lift}
+              lengthFeet={length}
+              widthFeet={width}
+              onPlace={dropAmenity}
+              onRemove={(id) => setPlacedAmenities((current) => current.filter((item) => item.id !== id))}
+            />
             <div className="studio-3d-tools">
               <div className="studio-panel-title"><span>LIVE SPATIAL MODEL</span><Compass size={15} /></div>
               <Screen3DPreview finishColor={finishData.color} shape={footprint} amenities={placedAmenities} level={selectedLevel} stairs={stairs} lift={lift} />
@@ -1547,10 +1708,14 @@ export default function SubterraneanDesignStudio(): React.JSX.Element {
       </div>
       {vrOpen && <WebXRSession
         finish={finishData}
+        footprint={footprint}
         lengthFeet={length}
         widthFeet={width}
         rooms={rooms}
+        amenities={placedAmenities}
         selectedLevel={selectedLevel}
+        stairs={stairs}
+        lift={lift}
         collaborator={collaborator}
         voiceAllowed={voicePermission}
         onClose={() => setVrOpen(false)}

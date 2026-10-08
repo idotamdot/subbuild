@@ -47,6 +47,19 @@ const rates: Record<FinishKey, EstimateRate> = {
   },
 }
 
+export function estimateFootprintArea(lengthFeet: number, widthFeet: number, footprint: FootprintKey): number {
+  const safeLength = Number.isFinite(lengthFeet) ? Math.max(1, Math.round(lengthFeet)) : 1
+  const safeWidth = Number.isFinite(widthFeet) ? Math.max(1, Math.round(widthFeet)) : 1
+  const rectangularArea = safeLength * safeWidth
+  if (footprint === 'circular') return Math.PI / 4 * Math.min(safeLength, safeWidth) ** 2
+  const footprintFactors: Record<Exclude<FootprintKey, 'circular'>, number> = {
+    rectangular: 1,
+    'l-shaped': 0.811,
+    octagonal: 0.9,
+  }
+  return rectangularArea * footprintFactors[footprint]
+}
+
 export type DesignEstimate = {
   finish: string
   access: { stairs: StairKey; lift: LiftKey }
@@ -89,11 +102,8 @@ export function estimateConcept({
   systems: BuildingSystems
 }): DesignEstimate {
   const rate = rates[finish]
-  const safeLength = Number.isFinite(lengthFeet) ? Math.max(1, Math.round(lengthFeet)) : 1
-  const safeWidth = Number.isFinite(widthFeet) ? Math.max(1, Math.round(widthFeet)) : 1
   const safeFloors = Number.isFinite(floors) ? Math.max(1, Math.round(floors)) : 1
-  const footprintFactor: Record<FootprintKey, number> = { rectangular: 1, 'l-shaped': 0.78, octagonal: 0.9, circular: Math.PI / 4 }
-  const area = safeLength * safeWidth * safeFloors * footprintFactor[footprint]
+  const area = estimateFootprintArea(lengthFeet, widthFeet, footprint) * safeFloors
   const constructionLow = area * rate.lowPerSquareFoot
   const constructionHigh = area * rate.highPerSquareFoot
   const stairRates: Record<StairKey, { low: number; high: number; laborLow: number; laborHigh: number; label: string }> = {
